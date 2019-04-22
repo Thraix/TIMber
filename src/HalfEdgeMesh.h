@@ -1,0 +1,73 @@
+#pragma once
+
+#include <internal/GreetTypes.h>
+#include <math/Vec3.h>
+#include <graphics/models/MeshData.h>
+#include <map>
+
+class HalfEdgeMesh
+{
+  static uint UNINITIALIZED;
+  struct Vertex
+  {
+    Vertex(uint vert):vert{vert}{}
+    uint vert;
+    uint edge = UNINITIALIZED;
+  };
+
+  struct HalfEdge
+  {
+    uint pair = UNINITIALIZED; 
+    uint prev = UNINITIALIZED; 
+    uint next = UNINITIALIZED; 
+    uint vert = UNINITIALIZED;
+    uint face = UNINITIALIZED;
+
+    HalfEdge(uint pair, uint vert)
+      : pair{pair}, vert{vert}
+    {}
+  };
+
+  struct Face
+  {
+    uint halfEdge;
+  };
+
+  struct OrderedPair
+  {
+    uint first,second;
+    OrderedPair(uint first, uint second) 
+      : first{first < second ? first : second}, 
+      second{first < second ? second : first} 
+    {}
+
+    bool operator<(const OrderedPair& rhs) const
+    {
+      if(first < rhs.first)
+        return true;
+      else if(first == rhs.first)
+        return second < rhs.second;
+      return false;
+    }
+  };
+
+  public:
+    std::vector<Vertex> vertices;
+    std::vector<HalfEdge> edges;
+    std::vector<Face> faces;
+
+    std::map<OrderedPair, uint> edgePairs;
+    std::map<Greet::Vec3<float>, uint> uniqueVertices;
+
+    // Used for drawing the mesh
+    std::vector<Greet::Vec3<float>> vertexArray;
+    std::vector<uint> indices;
+
+  public:
+
+    HalfEdgeMesh(Greet::MeshData* data);
+
+    void AddFace(const Greet::Vec3<float>& v1,const Greet::Vec3<float>& v2,const Greet::Vec3<float>& v3);
+    void AddVertex(const Greet::Vec3<float>& v, uint& index);
+    void AddEdge(uint v1, uint v2, uint& e1, uint& e2);
+};

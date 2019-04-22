@@ -8,7 +8,6 @@ class Game : public App
 {
   private:
 
-    // These should probably be initialized elsewhere later
     World* world;
 
   public:
@@ -26,7 +25,7 @@ class Game : public App
     void Init()
     {
       Loaders::LoadTextures("res/textures.json");
-      world = new World(10,10);
+      world = new World(1,1);
       RenderEngine::Add3DScene(world, "3dscene");
     }
 

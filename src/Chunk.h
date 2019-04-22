@@ -18,7 +18,7 @@ class Chunk
     Chunk();
     void Initialize(uint posX, uint posY);
 
-      void RecalcHeight(float* heightMap);
+    void RecalcHeight(float* heightMap);
     void CalcGridVertexOffset(Greet::MeshData* data);
     void RecalcGrid(Greet::MeshData* data);
 
@@ -26,4 +26,5 @@ class Chunk
     virtual ~Chunk();
     // Values between 0-CHUNK_SIZE
     float GetHeight(const Greet::Vec3<float>& chunkPosition);
+
 };

@@ -2,6 +2,7 @@
 
 #include <graphics/models/TPCamera.h>
 #include <graphics/renderers/BatchRenderer3D.h>
+#include "HalfEdgeMesh.h"
 
 class World;
 
@@ -34,7 +35,8 @@ class Player
       : material{Greet::Shader::FromFile("res/shaders/3dshader.shader")}
     {
       Greet::MeshData* data = Greet::MeshFactory::Cube(0,0.2f,0,0.2f,0.4f,0.2f);
-      mesh = new Greet::Mesh(data);
+      HalfEdgeMesh* halfEdgeMesh = new HalfEdgeMesh{data};
+      mesh = new Greet::Mesh(halfEdgeMesh->vertexArray.data(), halfEdgeMesh->vertexArray.size(), halfEdgeMesh->indices.data(), halfEdgeMesh->indices.size());
       model = new Greet::EntityModel(mesh, &material);
       delete data;
     }
