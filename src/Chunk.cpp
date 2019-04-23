@@ -15,11 +15,26 @@ void Chunk::Initialize(uint posX, uint posY)
   this->posX = posX;
   this->posY = posY;
   heightMap = Noise::GenNoise(CHUNK_WIDTH+1, CHUNK_HEIGHT+1,4,32, 32,0.75f, posX * CHUNK_WIDTH, posY * CHUNK_HEIGHT);
-  RecalcHeight(heightMap);
-  MeshData* data = MeshFactory::LowPolyGrid((CHUNK_WIDTH)/2.0,0,(CHUNK_HEIGHT)/2.0,CHUNK_WIDTH, CHUNK_HEIGHT,CHUNK_WIDTH, CHUNK_HEIGHT,heightMap, 1.0f);
-  RecalcGrid(data);
-  mesh = new Mesh(data);
-  delete data;
+  {
+    RecalcHeight(heightMap);
+    MeshData* data = MeshFactory::LowPolyGrid((CHUNK_WIDTH)/2.0,0,(CHUNK_HEIGHT)/2.0,CHUNK_WIDTH, CHUNK_HEIGHT,CHUNK_WIDTH, CHUNK_HEIGHT,heightMap, 1.0f);
+    RecalcGrid(data);
+    originalMesh= new Mesh(data);
+    delete data;
+  }
+
+  MCPointData data[(CHUNK_WIDTH+1) * (CHUNK_HEIGHT+1) * 20];
+  for(int z = 0;z<CHUNK_HEIGHT+1;z++)
+  {
+    for(int y = 0;y<20;y++)
+    {
+      for(int x = 0;x<CHUNK_WIDTH+1;x++)
+      {
+        data[x + y * (CHUNK_WIDTH+1) + z * (CHUNK_WIDTH+1) * 20].inhabited = heightMap[x + z * (CHUNK_WIDTH+1)] < y;
+      }
+    }
+  }
+  mesh = new MarchingCubes(data, CHUNK_WIDTH+1, 20, CHUNK_HEIGHT+1);
 }
 
 Chunk::~Chunk()

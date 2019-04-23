@@ -28,10 +28,16 @@ void World::Render() const
     for(int x = 0;x < width; x++)
     {
       terrainMaterial.GetShader().SetUniformMat4("transformationMatrix", Greet::Mat4::Translate(x * Chunk::CHUNK_WIDTH, 0, z * Chunk::CHUNK_HEIGHT));
-      Greet::Mesh* mesh = chunks[x + z * width].mesh;
+      Greet::Mesh* mesh = chunks[x + z * width].mesh->GetMesh();
       mesh->Bind();
       mesh->Render();
       mesh->Unbind();
+#if 0
+      Greet::Mesh* mesh2 = chunks[x + z * width].originalMesh;
+      mesh2->Bind();
+      mesh2->Render();
+      mesh2->Unbind();
+#endif
     }
   }
   terrainMaterial.Unbind();

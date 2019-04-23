@@ -25,7 +25,7 @@ class Game : public App
     void Init()
     {
       Loaders::LoadTextures("res/textures.json");
-      world = new World(1,1);
+      world = new World(2, 2);
       RenderEngine::Add3DScene(world, "3dscene");
     }
 

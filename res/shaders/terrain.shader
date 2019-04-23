@@ -17,7 +17,7 @@ const float gradient = 1.5;
 
 void main()
 {
-	vert_color = vec4(color.b, color.g, color.r, color.a);
+	vert_color = vec4(0,1,0,1);//vec4(color.b, color.g, color.r, color.a);
 	vec4 worldPosition = transformationMatrix * vec4(position, 1.0f);
 	vec4 positionRelativeToCamera = viewMatrix * worldPosition;
 	gl_Position = projectionMatrix * positionRelativeToCamera;

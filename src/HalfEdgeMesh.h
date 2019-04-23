@@ -12,6 +12,8 @@ class HalfEdgeMesh
   {
     Vertex(uint vert):vert{vert}{}
     uint vert;
+    Greet::Vec3<float> normal;
+
     uint edge = UNINITIALIZED;
   };
 
@@ -31,6 +33,7 @@ class HalfEdgeMesh
   struct Face
   {
     uint halfEdge;
+    Greet::Vec3<float> normal;
   };
 
   struct OrderedPair
@@ -65,9 +68,14 @@ class HalfEdgeMesh
 
   public:
 
+    HalfEdgeMesh();
     HalfEdgeMesh(Greet::MeshData* data);
 
-    void AddFace(const Greet::Vec3<float>& v1,const Greet::Vec3<float>& v2,const Greet::Vec3<float>& v3);
+    void AddFace(const Greet::Vec3<Greet::Vec3<float>>& vertices);
     void AddVertex(const Greet::Vec3<float>& v, uint& index);
     void AddEdge(uint v1, uint v2, uint& e1, uint& e2);
+
+    void CalculateNormals();
+
+    std::vector<size_t> FindNeightbouringFaces(size_t vertex);
 };

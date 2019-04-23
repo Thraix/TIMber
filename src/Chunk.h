@@ -2,6 +2,7 @@
 
 #include <graphics/models/Mesh.h>
 #include <utils/Noise.h>
+#include "MarchingCubes.h"
 
 class Chunk
 {
@@ -10,7 +11,8 @@ class Chunk
     static uint CHUNK_WIDTH;
     static uint CHUNK_HEIGHT;
 
-    Greet::Mesh* mesh;
+    MarchingCubes* mesh;
+    Greet::Mesh* originalMesh;
     float* heightMap;
     uint posX;
     uint posY;

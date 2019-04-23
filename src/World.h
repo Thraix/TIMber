@@ -21,6 +21,7 @@ class World : public Greet::Scene
   uint length;
 
   Chunk* chunks;
+
   public:
 
     // Initialize the world with a given size
