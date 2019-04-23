@@ -13,6 +13,7 @@ World::World(uint width, uint length)
     for(int x = 0;x < width; x++)
     {
       chunks[x+z*width].Initialize(x,z);
+      Log::Info("Initialized ", x+z*width+1, "/", width*length, " chunks");
     } 
   }
   player.OnWorldInit();

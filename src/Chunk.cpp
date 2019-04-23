@@ -15,6 +15,7 @@ void Chunk::Initialize(uint posX, uint posY)
   this->posX = posX;
   this->posY = posY;
   heightMap = Noise::GenNoise(CHUNK_WIDTH+1, CHUNK_HEIGHT+1,4,32, 32,0.75f, posX * CHUNK_WIDTH, posY * CHUNK_HEIGHT);
+  float* caves = Noise::GenNoise(CHUNK_WIDTH+1,20, CHUNK_HEIGHT+1,4,32,32, 32,0.75f, posX * CHUNK_WIDTH, 0, posY * CHUNK_HEIGHT);
   {
     RecalcHeight(heightMap);
     MeshData* data = MeshFactory::LowPolyGrid((CHUNK_WIDTH)/2.0,0,(CHUNK_HEIGHT)/2.0,CHUNK_WIDTH, CHUNK_HEIGHT,CHUNK_WIDTH, CHUNK_HEIGHT,heightMap, 1.0f);
@@ -30,7 +31,8 @@ void Chunk::Initialize(uint posX, uint posY)
     {
       for(int x = 0;x<CHUNK_WIDTH+1;x++)
       {
-        data[x + y * (CHUNK_WIDTH+1) + z * (CHUNK_WIDTH+1) * 20].inhabited = heightMap[x + z * (CHUNK_WIDTH+1)] < y;
+        int index = x + y * (CHUNK_WIDTH+1) + z * (CHUNK_WIDTH+1) * 20;
+        data[index].inhabited = heightMap[x + z * (CHUNK_WIDTH+1)] < y && (caves[index] < 0.45 || caves[index] > 0.55);
       }
     }
   }
