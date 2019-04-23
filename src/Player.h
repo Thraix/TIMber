@@ -14,6 +14,8 @@ class Player
     bool left = false;
     bool backward= false;
     bool right = false;
+    bool up = false;
+    bool down = false;
     bool mouseGrab = true;
   };
 

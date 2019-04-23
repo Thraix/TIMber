@@ -24,6 +24,7 @@ void Player::OnWorldInit()
 
 void Player::Render() const
 {
+  return;
   playerModel.model->BindShader(nullptr, &camera);
   playerModel.model->PreRender();
   playerModel.model->Render(nullptr, &camera);
@@ -36,9 +37,22 @@ void Player::Update(float timeElapsed)
   // Temporary pause
   if(!playerControl.mouseGrab)
     return;
-  Move(timeElapsed);
-  Gravity(timeElapsed);
+  //Move(timeElapsed);
+  //Gravity(timeElapsed);
   //CheckGroundCollision(timeElapsed)
+  playerMovement.velocity = {0.0f, 0.0f, 0.0f};
+  if(playerControl.left) playerMovement.velocity.x = -1;
+  if(playerControl.right) playerMovement.velocity.x = 1;
+  if(playerControl.up) playerMovement.velocity.y = 1;
+  if(playerControl.down) playerMovement.velocity.y = -1;
+  if(playerControl.forward) playerMovement.velocity.z = -1;
+  if(playerControl.backward) playerMovement.velocity.z = 1;
+
+  Vec2 movement{playerMovement.velocity.x, playerMovement.velocity.z};
+  movement.Rotate(camera.GetRotation() + 90);
+  playerMovement.velocity = {movement.x, playerMovement.velocity.y, movement.y};
+  position += playerMovement.velocity * timeElapsed * 10;
+
   playerModel.model->SetPosition(position);
   playerModel.model->Update(timeElapsed);
 
@@ -112,7 +126,13 @@ void Player::OnEvent(Event& event)
     if(e.GetButton() == GLFW_KEY_D)
       playerControl.right = true;
     if(playerMovement.onGround && e.GetButton() == GLFW_KEY_SPACE)
+    {
       playerMovement.velocity.y += 5.0f;
+    }
+    if(e.GetButton() == GLFW_KEY_SPACE)
+      playerControl.up = true;
+    if(e.GetButton() == GLFW_KEY_LEFT_SHIFT)
+      playerControl.down = true;
     if(e.GetButton() == GLFW_KEY_ESCAPE)
     {
       playerControl.mouseGrab = !playerControl.mouseGrab;
@@ -131,6 +151,10 @@ void Player::OnEvent(Event& event)
       playerControl.left = false;
     if(e.GetButton() == GLFW_KEY_D)
       playerControl.right = false;
+    if(e.GetButton() == GLFW_KEY_SPACE)
+      playerControl.up = false;
+    if(e.GetButton() == GLFW_KEY_LEFT_SHIFT)
+      playerControl.down = false;
   }
   else if(EVENT_IS_TYPE(event, EventType::MOUSE_MOVE))
   {
