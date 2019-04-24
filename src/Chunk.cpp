@@ -32,7 +32,7 @@ void Chunk::Initialize(uint posX, uint posY)
       for(int x = 0;x<CHUNK_WIDTH+1;x++)
       {
         int index = x + y * (CHUNK_WIDTH+1) + z * (CHUNK_WIDTH+1) * 20;
-        data[index].inhabited = heightMap[x + z * (CHUNK_WIDTH+1)] < y && (caves[index] < 0.45 || caves[index] > 0.55);
+        data[index].inhabited = x > 1 && x < 4 && y > 1 && y < 4 && z > 1 && z < 4;//heightMap[x + z * (CHUNK_WIDTH+1)] > y && !(caves[index] < 0.45 || caves[index] > 0.55);
       }
     }
   }

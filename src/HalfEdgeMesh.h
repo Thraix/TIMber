@@ -74,8 +74,12 @@ class HalfEdgeMesh
     void AddFace(const Greet::Vec3<Greet::Vec3<float>>& vertices);
     void AddVertex(const Greet::Vec3<float>& v, uint& index);
     void AddEdge(uint v1, uint v2, uint& e1, uint& e2);
-
     void CalculateNormals();
 
+    bool RayCast(const Greet::Vec3<float>& near, const Greet::Vec3<float>& far);
+
     std::vector<size_t> FindNeightbouringFaces(size_t vertex);
+  private:
+    float SignedVolume(const Greet::Vec3<float>& v1,const Greet::Vec3<float>& v2,const Greet::Vec3<float>& v3,const Greet::Vec3<float>& v4);
+bool NegativeVolume(const Greet::Vec3<float>& v1,const Greet::Vec3<float>& v2,const Greet::Vec3<float>& v3,const Greet::Vec3<float>& v4);
 };

@@ -4,6 +4,9 @@
     {
       "name": "skybox",
       "type": "CubeMap"
+    },
+    {
+      "name": "crosshair"
     }
   ]
 }

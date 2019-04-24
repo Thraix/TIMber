@@ -7,8 +7,8 @@ using namespace Greet;
 
 TPCamera Player::CreateCamera()
 {
-  float distance = 2.0f;
-  return TPCamera(Greet::Mat4::ProjectionMatrix(Window::GetAspect(), 90.0, 0.01, 1000.0), Greet::Vec3<float>(), distance, 0.4, 0, distance, distance,0.0,1.0);
+  float distance = 0.0f;
+  return TPCamera(Greet::Mat4::ProjectionMatrix(Window::GetAspect(), 90.0, 0.01, 1000.0), Greet::Vec3<float>(), distance, 0.4, 0, distance, distance,-1.0,1.0);
 }
 
 Player::Player(World* world, const Greet::Vec3<float>& position)

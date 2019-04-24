@@ -34,7 +34,7 @@ void HalfEdgeMesh::AddVertex(const Vec3<float>& v, uint& index)
   indices.push_back(index);
 }
 
-void HalfEdgeMesh::AddFace(const Greet::Vec3<Greet::Vec3<float>>& vertices)
+void HalfEdgeMesh::AddFace(const Vec3<Vec3<float>>& vertices)
 {
   uint faceIndices[3];
   for(uint i = 0;i<3;i++)
@@ -43,15 +43,15 @@ void HalfEdgeMesh::AddFace(const Greet::Vec3<Greet::Vec3<float>>& vertices)
   }
 
   uint edgeIndices[6];
-  for(uint j = 0;j<3;j++)
+  for(uint i = 0;i<3;i++)
   {
-    AddEdge(faceIndices[j], faceIndices[(j+1)%3], edgeIndices[j*2], edgeIndices[j*2+1]);
+    AddEdge(faceIndices[i], faceIndices[(i+1)%3], edgeIndices[i*2], edgeIndices[i*2+1]);
   }
 
-  for(uint j = 0;j<3;j++)
+  for(uint i = 0;i<3;i++)
   {
-    edges[edgeIndices[j*2]].next = edgeIndices[(j*2+2) % 6];
-    edges[edgeIndices[j*2+1]].prev = edgeIndices[((j+2)*2) % 6];
+    edges[edgeIndices[i*2]].next = edgeIndices[(i*2 + 2) % 6];
+    edges[edgeIndices[i*2]].prev = edgeIndices[(i*2 + 4) % 6];
   }
 
   uint faceIndex{(uint)(faces.size())};
@@ -84,10 +84,10 @@ void HalfEdgeMesh::AddEdge(uint v1, uint v2, uint& e1, uint& e2)
   e1 = edges.size();
   e2 = e1 + 1;
 
-  HalfEdge edge1{e1, v1}, edge2{e2,v2};
+  HalfEdge edge1{e2, v1}, edge2{e1,v2};
 
   vertices[v1].edge = e1;
-  vertices[v1].edge = e2;
+  vertices[v2].edge = e2;
 
   edges.push_back(edge1);
   edges.push_back(edge2);
@@ -99,7 +99,7 @@ void HalfEdgeMesh::CalculateNormals()
   for(auto&& vertex : vertices)
   {
     std::vector<size_t> nFaces = FindNeightbouringFaces(vertex.vert);
-    Greet::Vec3<float> normal{};
+    Vec3<float> normal{};
     for(auto&& face : nFaces)
     {
       normal += faces[face].normal;
@@ -107,6 +107,35 @@ void HalfEdgeMesh::CalculateNormals()
     normal.Normalize();
     vertex.normal = normal;
   }
+}
+
+bool HalfEdgeMesh::RayCast(const Vec3<float>& near, const Vec3<float>& far)
+{
+  for(auto&& face : faces)
+  {
+    Vec3<float> v1 = vertexArray[edges[face.halfEdge].vert];
+    Vec3<float> v2 = vertexArray[edges[edges[face.halfEdge].next].vert];
+    Vec3<float> v3 = vertexArray[edges[edges[edges[face.halfEdge].next].next].vert];
+    if(NegativeVolume(near, v1, v2, v3) != NegativeVolume(far,v1,v2,v3))
+    {
+      bool s1 = NegativeVolume(near, far, v1, v2);
+      bool s2 = NegativeVolume(near, far, v2, v3);
+      bool s3 = NegativeVolume(near, far, v3, v1);
+      if(s1 == s2 && s2 == s3)
+        return true;
+    }
+  }
+  return false;
+}
+
+bool HalfEdgeMesh::NegativeVolume(const Vec3<float>& v1,const Vec3<float>& v2,const Vec3<float>& v3,const Vec3<float>& v4)
+{
+  return std::signbit(SignedVolume(v1,v2,v3,v4));
+}
+
+float HalfEdgeMesh::SignedVolume(const Vec3<float>& v1,const Vec3<float>& v2,const Vec3<float>& v3,const Vec3<float>& v4)
+{
+  return (v2-v1).Cross(v3 - v1).Dot(v4-v1) * (1.0f/6.0f);
 }
 
 std::vector<size_t> HalfEdgeMesh::FindNeightbouringFaces(size_t vertex)

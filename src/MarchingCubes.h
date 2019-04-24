@@ -12,10 +12,10 @@ class MarchingCubes
 
   private:
     Greet::Mesh* mesh;
+    HalfEdgeMesh heMesh;
   public:
     MarchingCubes(MCPointData* data, uint width, uint height, uint length)
     {
-      HalfEdgeMesh heMesh;
       // Go through all the cubes
       for(uint z = 0;z<length-1;z++)
       {
@@ -45,6 +45,11 @@ class MarchingCubes
     Greet::Mesh* GetMesh()
     {
       return mesh;
+    }
+
+    HalfEdgeMesh* GetHalfEdgeMesh()
+    {
+      return &heMesh;
     }
 };
 

@@ -25,7 +25,7 @@ class MCClassification
       {
         classification >>= 1;
         const MCPointData& point = data[(x + (size_t)vertex.x) + (y + (size_t)vertex.y) * width  + (z + (size_t)vertex.z) * width * height];
-        if(point.inhabited)
+        if(!point.inhabited)
           classification |= 0x80; // 0b1000000
       }
       std::vector<Greet::Vec3<size_t>> faces = classifications[classification];

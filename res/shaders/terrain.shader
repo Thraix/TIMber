@@ -5,42 +5,92 @@ layout(location = 0) in vec3 position;
 layout(location = 2) in vec4 color;
 layout(location = 3) in vec3 normal;
 
-flat out vec4 vert_color;
-flat out float visibility;
+out VertexData
+{
+  vec3 worldPos;
+  vec4 color;
+  float visibility;
+} vs_out;
 
 uniform mat4 transformationMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
-uniform vec3 light_color = vec3(1.0f, 0.96f, 0.9f);
 const float density = 0.003;
 const float gradient = 1.5;
 
 void main()
 {
-	vert_color = vec4(0,1,0,1);//vec4(color.b, color.g, color.r, color.a);
-	vec4 worldPosition = transformationMatrix * vec4(position, 1.0f);
-	vec4 positionRelativeToCamera = viewMatrix * worldPosition;
-	gl_Position = projectionMatrix * positionRelativeToCamera;
+  vs_out.color = vec4(0,1,0,1);//vec4(color.b, color.g, color.r, color.a);
+  vec4 worldPosition = transformationMatrix * vec4(position, 1.0f);
+  vec4 positionRelativeToCamera = viewMatrix * worldPosition;
 
-	vec3 surfaceNormal = (transformationMatrix * vec4(normal, 0.0)).xyz;
-	vec3 toLightVector = vec3(-100, 100, 0);
-	vec3 toCameraVector = (inverse(viewMatrix) * vec4(0, 0, 0, 1)).xyz - worldPosition.xyz;
+  gl_Position = projectionMatrix * positionRelativeToCamera;
+  vs_out.worldPos = worldPosition.xyz;
 
-	float distance = length(positionRelativeToCamera.xyz);
-	visibility = exp(-pow((distance*density), gradient));
-	visibility = clamp(visibility, 0.0, 1.0);
-	vert_color *= vec4(0.8f, 0.8f, 0.8f, 1.0f);
-	vec3 unitNormal = normalize(surfaceNormal);
-	vec3 unitLightVector = normalize(toLightVector);
-
-	float nDot = dot(unitNormal, unitLightVector);
-	float brightness = nDot;//max(nDot,0.6);
-	if (brightness < 0.7)
-		brightness = mix(0.3, 0.7, brightness / 0.7);
-
-	vec3 diffuse = light_color * brightness;
-	vert_color *= vec4(diffuse, 1.0f);
+  float distance = length(positionRelativeToCamera.xyz);
+  vs_out.visibility = exp(-pow((distance*density), gradient));
+  vs_out.visibility = clamp(vs_out.visibility, 0.0, 1.0);
 }
+
+//geometry
+#version 330 core 
+
+layout(triangles) in;
+layout(triangle_strip, max_vertices=3) out;
+
+uniform mat4 transformationMatrix;
+uniform mat4 viewMatrix;
+
+uniform vec3 light_color = vec3(1.0f, 0.96f, 0.9f);
+uniform sampler2D noiseTexture;
+
+
+in VertexData
+{
+  vec3 worldPos;
+  vec4 color;
+  float visibility;
+} gs_in[];
+
+out FragmentData
+{
+  vec4 color;
+  float visibility;
+} gs_out;
+
+void main()
+{
+  vec3 position = (gs_in[0].worldPos + gs_in[1].worldPos + gs_in[2].worldPos) / 3.0;
+  vec3 surfaceNormal = normalize(cross(gs_in[1].worldPos - gs_in[0].worldPos, gs_in[2].worldPos - gs_in[0].worldPos));
+  surfaceNormal.x += (texture(noiseTexture, vec2(position.x, position.x)/1).r-0.5f) * 1.0f;
+  surfaceNormal.y += (texture(noiseTexture, vec2(position.y, position.y)/1).r-0.5f) * 1.0f;
+  surfaceNormal.z += (texture(noiseTexture, vec2(position.z, position.z)/1).r-0.5f) * 1.0f;
+  surfaceNormal = normalize(surfaceNormal);
+  vec3 toLightVector = vec3(-100, 100, 0);
+  vec3 toCameraVector = (inverse(viewMatrix) * vec4(0, 0, 0, 1)).xyz - position;
+  vec3 unitNormal = normalize(surfaceNormal);
+  vec3 unitLightVector = normalize(toLightVector);
+
+  float nDot = dot(unitNormal, unitLightVector);
+  float brightness = (nDot+1) / 2.0;//max(nDot,0.6);
+
+  if (brightness < 0.7)
+    brightness = mix(0.3, 0.7, brightness / 0.7);
+
+  vec3 diffuse = light_color * brightness;
+  vec4 color = gs_in[0].color * vec4(diffuse, 1.0f);
+
+  for(int i = 0; i<3;i++)
+  {
+    gl_Position = gl_in[i].gl_Position;
+    gs_out.visibility = gs_in[i].visibility;
+    gs_out.color = color;
+
+    EmitVertex();
+  }
+  EndPrimitive();
+}
+
 
 //fragment
 #version 330 core
@@ -48,12 +98,18 @@ void main()
 flat in vec4 vert_color;
 flat in float visibility;
 
+in FragmentData
+{
+  vec4 color;
+  float visibility;
+} fs_in;
+
 
 out vec4 out_color;
 uniform vec4 fogColor = vec4(0.125, 0.125, 0.125, 1);
 
 void main()
 {
-	out_color = vert_color;
-	out_color = mix(vec4(fogColor.rgb, out_color.a), vec4(out_color.rgb, out_color.a), visibility);
+  out_color = fs_in.color;
+  out_color = mix(vec4(fogColor.rgb, out_color.a), vec4(out_color.rgb, out_color.a), fs_in.visibility);
 }

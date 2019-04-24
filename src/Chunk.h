@@ -28,5 +28,5 @@ class Chunk
     virtual ~Chunk();
     // Values between 0-CHUNK_SIZE
     float GetHeight(const Greet::Vec3<float>& chunkPosition);
-
+    Greet::Mat4 GetTransformationMatrix() const { return Greet::Mat4::Translate({posX * CHUNK_WIDTH, 0 , posY * CHUNK_HEIGHT});}
 };
