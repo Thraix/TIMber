@@ -1,6 +1,7 @@
 #include <Greet.h>
 
 #include "World.h"
+#include "LineRenderer.h"
 
 using namespace Greet;
 class CrossHairLayer : public Layer
@@ -30,6 +31,7 @@ class Game : public App
   private:
 
     World* world;
+    Layer3D* lineLayer;
     CrossHairLayer* layer;
     Renderable2D* crossHair;
 
@@ -44,10 +46,12 @@ class Game : public App
     {
       delete world;
       delete layer;
+      LineRenderer::DestroyInstance();
     }
 
     void Init()
     {
+      LineRenderer::CreateInstance();
       Loaders::LoadTextures("res/textures.json");
       float* noiseMap = Noise::GenNoise(512,512, 5, 32, 32, 0.75f);
       BYTE* image = ImageUtils::CreateHeightmapImage(noiseMap, 512, 512);
@@ -56,7 +60,7 @@ class Game : public App
       crossHair = new Renderable2D({0,0}, {20,20}, 0xffffffff, new Sprite(TextureManager::Get2D("crosshair")), nullptr);
       //Renderable2D* noiseRenderable = new Renderable2D({0,0}, {512,512}, 0xffffffff, new Sprite(TextureManager::Get2D("noiseMap")), nullptr);
       layer = new CrossHairLayer(crossHair);
-     // layer->Add(noiseRenderable);
+      // layer->Add(noiseRenderable);
 
       world = new World(2, 2);
       RenderEngine::Add3DScene(world, "3dscene");

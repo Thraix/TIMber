@@ -2,6 +2,7 @@
 
 #include "Chunk.h"
 #include "Player.h"
+#include "TerrainCursor.h"
 
 #include <internal/GreetTypes.h>
 #include <graphics/layers/Scene.h>
@@ -20,8 +21,10 @@ class World : public Greet::Scene
   const Greet::Texture2D& noiseTexture;
   uint width;
   uint length;
-
   Chunk* chunks;
+
+  IntersectionData chunkIntersection;
+  TerrainCursor cursor;
 
   public:
 

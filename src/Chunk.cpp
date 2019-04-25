@@ -84,7 +84,7 @@ float Chunk::GetHeight(const Vec3<float>& chunkPosition)
 }
 #endif
 
-void Chunk::RayCastChunk(const TPCamera& camera)
+IntersectionData Chunk::RayCastChunk(const TPCamera& camera)
 {
   Mat4 screenToModel = ~(camera.GetProjectionMatrix() * camera.GetViewMatrix() * GetTransformationMatrix());
 
@@ -99,8 +99,11 @@ void Chunk::RayCastChunk(const TPCamera& camera)
   {
     static int i = 0;
     i++;
-    IntersectionData intersect = mesh->GetHalfEdgeMesh()->RayCast(near, far);
-    if(intersect.hasIntersection)
-      Log::Info("INTERSECTION",i);
+    IntersectionData data = mesh->GetHalfEdgeMesh()->RayCast(near, far);
+    data.v1 = Vec3<float>(GetTransformationMatrix() * data.v1);
+    data.v2 = Vec3<float>(GetTransformationMatrix() * data.v2);
+    data.v3 = Vec3<float>(GetTransformationMatrix() * data.v3);
+    return data;
   }
+  return IntersectionData();
 }

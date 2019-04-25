@@ -23,5 +23,5 @@ class Chunk
   public:
     virtual ~Chunk();
     Greet::Mat4 GetTransformationMatrix() const { return Greet::Mat4::Translate({posX * CHUNK_WIDTH, 0 , posY * CHUNK_HEIGHT});}
-    void RayCastChunk(const Greet::TPCamera& camera);
+    IntersectionData RayCastChunk(const Greet::TPCamera& camera);
 };

@@ -1,5 +1,7 @@
 #include "World.h"
 
+#include "LineRenderer.h"
+
 using namespace Greet;
 
 World::World(uint width, uint length)
@@ -22,6 +24,13 @@ World::World(uint width, uint length)
 void World::Render() const 
 {
   skybox.Render(player.GetCamera());
+  if(chunkIntersection.hasIntersection)
+  {
+    LineRenderer::GetInstance().DrawLine(player.GetCamera(), chunkIntersection.v1, chunkIntersection.v2, Vec4(1,1,1,1));
+    LineRenderer::GetInstance().DrawLine(player.GetCamera(), chunkIntersection.v2, chunkIntersection.v3, Vec4(1,1,1,1));
+    LineRenderer::GetInstance().DrawLine(player.GetCamera(), chunkIntersection.v3, chunkIntersection.v1, Vec4(1,1,1,1));
+    cursor.Render(player.GetCamera(), chunkIntersection);
+  }
 
   terrainMaterial.Bind(&player.GetCamera());
   noiseTexture.Enable();
@@ -55,6 +64,7 @@ void World::Update(float timeElapsed)
   int chunkMinZ = floor((pos.z- player.GetReach()) / (double)Chunk::CHUNK_HEIGHT);
   int chunkMaxX = ceil((pos.x + player.GetReach()) / (double)Chunk::CHUNK_WIDTH);
   int chunkMaxZ = ceil((pos.z + player.GetReach()) / (double)Chunk::CHUNK_HEIGHT);
+  chunkIntersection.hasIntersection = false;
   for(int z = chunkMinZ; z < chunkMaxZ; z++)
   {
     if(z < 0 || z >= length)
@@ -63,7 +73,12 @@ void World::Update(float timeElapsed)
     {
       if(x < 0 || x >= width)
         continue;
-      chunks[x + z * width].RayCastChunk(player.GetCamera());
+      IntersectionData data = chunks[x + z * width].RayCastChunk(player.GetCamera());
+      if(data.hasIntersection)
+      {
+        if(!chunkIntersection.hasIntersection || data.distanceFromNear < chunkIntersection.distanceFromNear)
+          chunkIntersection = data;
+      } 
     }
   }
 }
