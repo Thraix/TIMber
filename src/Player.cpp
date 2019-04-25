@@ -19,7 +19,7 @@ Player::Player(World* world, const Greet::Vec3<float>& position)
 
 void Player::OnWorldInit()
 {
-  position.y = world->GetHeight(position);
+  //position.y = world->GetHeight(position);
 }
 
 void Player::Render() const
@@ -92,7 +92,8 @@ void Player::Move(float timeElapsed)
 
 void Player::Gravity(float timeElapsed)
 {
-  float y = world->GetHeight(position);
+  float y = 0.0f;
+  //float y = world->GetHeight(position);
   float grav = 0.0f;
   if(position.y > y)
     grav = -10.0f;

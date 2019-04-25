@@ -109,8 +109,10 @@ void HalfEdgeMesh::CalculateNormals()
   }
 }
 
-bool HalfEdgeMesh::RayCast(const Vec3<float>& near, const Vec3<float>& far)
+IntersectionData HalfEdgeMesh::RayCast(const Vec3<float>& near, const Vec3<float>& far)
 {
+  // This is a vector of pairs with faces and their intersection distance from the near point.
+  IntersectionData intersection;
   for(auto&& face : faces)
   {
     Vec3<float> v1 = vertexArray[edges[face.halfEdge].vert];
@@ -122,10 +124,27 @@ bool HalfEdgeMesh::RayCast(const Vec3<float>& near, const Vec3<float>& far)
       bool s2 = NegativeVolume(near, far, v2, v3);
       bool s3 = NegativeVolume(near, far, v3, v1);
       if(s1 == s2 && s2 == s3)
-        return true;
+      {
+        // We have an intersection
+
+        TriangleFace triangleFace = {v1,v2,v3};
+        Vec3<float> intersectionPoint = LineIntersectPlane(near, far, triangleFace);
+        float distanceFromNear = (intersectionPoint - near).Length();
+        if(!intersection.hasIntersection || distanceFromNear < intersection.distanceFromNear)
+        {
+          intersection = {
+            .hasIntersection = true,
+            .v1 = v1,
+            .v2 = v2,
+            .v3 = v3,
+            .intersectionPoint = intersectionPoint,
+            .distanceFromNear = distanceFromNear
+          };
+        }
+      }
     }
   }
-  return false;
+  return intersection;
 }
 
 bool HalfEdgeMesh::NegativeVolume(const Vec3<float>& v1,const Vec3<float>& v2,const Vec3<float>& v3,const Vec3<float>& v4)
@@ -136,6 +155,15 @@ bool HalfEdgeMesh::NegativeVolume(const Vec3<float>& v1,const Vec3<float>& v2,co
 float HalfEdgeMesh::SignedVolume(const Vec3<float>& v1,const Vec3<float>& v2,const Vec3<float>& v3,const Vec3<float>& v4)
 {
   return (v2-v1).Cross(v3 - v1).Dot(v4-v1) * (1.0f/6.0f);
+}
+
+Vec3<float> HalfEdgeMesh::LineIntersectPlane(const Vec3<float>& near, const Vec3<float>& far, const TriangleFace& plane)
+{
+  Vec3<float> normal = (plane[1] - plane[0]).Cross(plane[2] - plane[0]);
+  float d = normal.Dot(plane[0]);
+  float t = (d - normal.Dot(near)) / normal.Dot(far-near);
+  return near + (far - near) * t;
+
 }
 
 std::vector<size_t> HalfEdgeMesh::FindNeightbouringFaces(size_t vertex)

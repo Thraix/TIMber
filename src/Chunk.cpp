@@ -1,6 +1,9 @@
 #include "Chunk.h"
 
+#include "RayCast.h"
+
 #include <graphics/models/MeshFactory.h> 
+#include <graphics/models/TPCamera.h> 
 
 using namespace Greet;
 
@@ -17,9 +20,7 @@ void Chunk::Initialize(uint posX, uint posY)
   heightMap = Noise::GenNoise(CHUNK_WIDTH+1, CHUNK_HEIGHT+1,4,32, 32,0.75f, posX * CHUNK_WIDTH, posY * CHUNK_HEIGHT);
   float* caves = Noise::GenNoise(CHUNK_WIDTH+1,20, CHUNK_HEIGHT+1,4,32,32, 32,0.75f, posX * CHUNK_WIDTH, 0, posY * CHUNK_HEIGHT);
   {
-    RecalcHeight(heightMap);
-    MeshData* data = MeshFactory::LowPolyGrid((CHUNK_WIDTH)/2.0,0,(CHUNK_HEIGHT)/2.0,CHUNK_WIDTH, CHUNK_HEIGHT,CHUNK_WIDTH, CHUNK_HEIGHT,heightMap, 1.0f);
-    RecalcGrid(data);
+    MeshData* data = MeshFactory::LowPolyGrid((CHUNK_WIDTH)/2.0,0,(CHUNK_HEIGHT)/2.0,CHUNK_WIDTH, CHUNK_HEIGHT,CHUNK_WIDTH, CHUNK_HEIGHT,heightMap, 20.0f);
     originalMesh= new Mesh(data);
     delete data;
   }
@@ -32,7 +33,7 @@ void Chunk::Initialize(uint posX, uint posY)
       for(int x = 0;x<CHUNK_WIDTH+1;x++)
       {
         int index = x + y * (CHUNK_WIDTH+1) + z * (CHUNK_WIDTH+1) * 20;
-        data[index].inhabited = x > 1 && x < 4 && y > 1 && y < 4 && z > 1 && z < 4;//heightMap[x + z * (CHUNK_WIDTH+1)] > y && !(caves[index] < 0.45 || caves[index] > 0.55);
+        data[index].inhabited = heightMap[x + z * (CHUNK_WIDTH+1)] * 20 > y && !(caves[index] < 0.45 || caves[index] > 0.55);
       }
     }
   }
@@ -44,6 +45,7 @@ Chunk::~Chunk()
   delete mesh;
 }
 
+#if 0
 float Chunk::GetHeight(const Vec3<float>& chunkPosition)
 {
   int x = floorf(chunkPosition.x);
@@ -80,97 +82,25 @@ float Chunk::GetHeight(const Vec3<float>& chunkPosition)
   }
   return d - normal.x * xDec - normal.z * zDec;
 }
+#endif
 
-void Chunk::RecalcHeight(float* heightMap)
+void Chunk::RayCastChunk(const TPCamera& camera)
 {
-  for(int i = 0;i<(CHUNK_WIDTH+1) * (CHUNK_HEIGHT+1);i++)
-  {
-    if (heightMap[i] < 0.45)
-    {
-      //y = 0.45f + Noise::PRNG(vertex->x, vertex->z)*0.01f;// + 0.03f*(rand() / (float)RAND_MAX - 0.5f);
-    }
-    else if (heightMap[i] < 0.48)
-    {
+  Mat4 screenToModel = ~(camera.GetProjectionMatrix() * camera.GetViewMatrix() * GetTransformationMatrix());
 
-    }
-    else if (heightMap[i] < 0.58)
-    {
+  Vec4 nearRes = screenToModel * Vec3<float>(0.0f, 0.0f, -1.0);
+  Vec4 farRes = screenToModel * Vec3<float>(0.0f, 0.0f, 1.0);
 
-    }
-    else if (heightMap[i] < 0.65)
-    {
-      //heightMap[i] = (pow(heightMap[i] - 0.58, 0.6) + 0.58);
-    }
-    else
-    {
-      //heightMap[i] = (pow(heightMap[i] - 0.58, 0.6) + 0.58);
-    }
-    heightMap[i] *= 20;
-  }
-}
+  // Normalize the w
+  Vec3<float> near = Vec3<float>(nearRes) / nearRes.w;
+  Vec3<float> far = Vec3<float>(farRes) / farRes.w;
 
-void RecalcColors(const Vec3<float>& v1, const Vec3<float>& v2, const Vec3<float>& v3, uint* color)
-{
-  float y = (v1.y + v2.y + v3.y) / 3.0f / 20.0f;
-  if (y < 0.45+0.01f)
+  if(RayCast::CheckCube(near,far, {0,0,0}, {CHUNK_WIDTH+1, 20, CHUNK_HEIGHT+1}))
   {
-    uint blue = (uint)(pow(1, 4.0f) * 255);
-    blue = blue > 255 ? 255 : blue;
-    *color = 0xff000000 | ((blue / 2) << 16) | ((uint)(blue * 0.9) << 8) | blue;
-    *color = 0xffffd399;
+    static int i = 0;
+    i++;
+    IntersectionData intersect = mesh->GetHalfEdgeMesh()->RayCast(near, far);
+    if(intersect.hasIntersection)
+      Log::Info("INTERSECTION",i);
   }
-  else if (y < 0.48)
-  {
-    *color = 0xffffd399;
-  }
-  else// if (y < 0.58)
-  {
-    *color = 0xff5cff64;
-  }
-  /*
-     else if (y < pow(0.07, 0.6) + 0.58)
-     {
-   *color = 0xffB5B0A8;
-   }
-   else
-   {
-   *color = 0xffDCF2F2;
-   }
-   */
-  *color = 0xff5cff64;
-}
-
-void Chunk::CalcGridVertexOffset(MeshData* data)
-{
-  Vec3<float>* vertices = data->GetVertices();
-  uint vertexCount = data->GetVertexCount();
-  uint indexCount = data->GetIndexCount();
-  uint* indices = data->GetIndices();
-
-  byte* offsets = new byte[4 * vertexCount];
-  for (int i = 0;i < indexCount;i+=3)
-  {
-    Vec3<float> v1 = vertices[indices[i+1]] - vertices[indices[i]];
-    Vec3<float> v2 = vertices[indices[i+2]] - vertices[indices[i]];
-    offsets[indices[i]*4] = round(v1.x);
-    offsets[indices[i]*4 + 1] = round(v1.z);
-    offsets[indices[i]*4 + 2] = round(v2.x);
-    offsets[indices[i]*4 + 3] = round(v2.z);
-  }
-  data->AddAttribute(new AttributeData<byte>(AttributeDefaults(4, 4, 4 * sizeof(byte), GL_BYTE,GL_FALSE), offsets));
-}
-
-void Chunk::RecalcGrid(MeshData* data)
-{
-  uint* colors = new uint[data->GetVertexCount()];
-  Vec3<float>* vertices = data->GetVertices();
-  uint indexCount = data->GetIndexCount();
-  uint* indices = data->GetIndices();
-  Vec3<float>* normals = (Vec3<float>*)data->GetAttribute(ATTRIBUTE_NORMAL)->data;
-  for (int i = 0;i < indexCount;i += 3)
-  {
-    normals[indices[i]] = MeshFactory::CalculateNormal(vertices[indices[i]], vertices[indices[i + 1]], vertices[indices[i + 2]]);
-    RecalcColors(vertices[indices[i]], vertices[indices[i+1]], vertices[indices[i+2]], &colors[indices[i]]);
-  }
-  data->AddAttribute(new AttributeData<uint>(ATTRIBUTE_COLOR, colors));
 }

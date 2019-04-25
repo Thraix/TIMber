@@ -71,6 +71,8 @@ class Player
     void OnEvent(Greet::Event& event);
 
     const Greet::TPCamera& GetCamera() const;
+    const Greet::Vec3<float>& GetPosition() const { return position; }
+    const float GetReach() const { return 8; };
 
   private:
     void Move(float timeElapsed);

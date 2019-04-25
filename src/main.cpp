@@ -54,7 +54,9 @@ class Game : public App
       TextureManager::Add("noiseMap", Texture2D(image, 512, 512));
 
       crossHair = new Renderable2D({0,0}, {20,20}, 0xffffffff, new Sprite(TextureManager::Get2D("crosshair")), nullptr);
+      //Renderable2D* noiseRenderable = new Renderable2D({0,0}, {512,512}, 0xffffffff, new Sprite(TextureManager::Get2D("noiseMap")), nullptr);
       layer = new CrossHairLayer(crossHair);
+     // layer->Add(noiseRenderable);
 
       world = new World(2, 2);
       RenderEngine::Add3DScene(world, "3dscene");

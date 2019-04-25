@@ -50,7 +50,22 @@ void World::Render() const
 void World::Update(float timeElapsed) 
 {
   player.Update(timeElapsed);
-  RayCastChunk(1,0);
+  Vec3<float> pos = player.GetPosition();
+  int chunkMinX = floor((pos.x - player.GetReach()) / (double)Chunk::CHUNK_WIDTH);
+  int chunkMinZ = floor((pos.z- player.GetReach()) / (double)Chunk::CHUNK_HEIGHT);
+  int chunkMaxX = ceil((pos.x + player.GetReach()) / (double)Chunk::CHUNK_WIDTH);
+  int chunkMaxZ = ceil((pos.z + player.GetReach()) / (double)Chunk::CHUNK_HEIGHT);
+  for(int z = chunkMinZ; z < chunkMaxZ; z++)
+  {
+    if(z < 0 || z >= length)
+      continue;
+    for(int x = chunkMinX; x < chunkMaxX; x++)
+    {
+      if(x < 0 || x >= width)
+        continue;
+      chunks[x + z * width].RayCastChunk(player.GetCamera());
+    }
+  }
 }
 
 void World::OnEvent(Greet::Event& event) 
@@ -58,6 +73,7 @@ void World::OnEvent(Greet::Event& event)
   player.OnEvent(event);
 }
 
+#if 0
 float World::GetHeight(const Vec3<float>& position)
 {
   int chunkX = floor(position.x / (double)Chunk::CHUNK_WIDTH);
@@ -69,21 +85,4 @@ float World::GetHeight(const Vec3<float>& position)
 
   return chunks[chunkX + chunkZ * width].GetHeight(position - Vec3<float>(chunkX * Chunk::CHUNK_WIDTH, 0.0f, chunkZ * Chunk::CHUNK_HEIGHT));
 }
-
-void World::RayCastChunk(int x, int y)
-{
-  static int i = 0;
-  i++;
-  Mat4 screenToModel = ~(player.GetCamera().GetProjectionMatrix() * player.GetCamera().GetViewMatrix() * chunks[x + y * width].GetTransformationMatrix());
-
-  Vec4 nearRes = screenToModel * Vec3<float>(0.0f, 0.0f, -1.0);
-  Vec4 farRes = screenToModel * Vec3<float>(0.0f, 0.0f, 1.0);
-
-  // Normalize the w
-  Vec3<float> near = Vec3<float>(nearRes) / nearRes.w;
-  Vec3<float> far = Vec3<float>(farRes) / farRes.w;
-
-  bool intersect = chunks[x + y * width].mesh->GetHalfEdgeMesh()->RayCast(near, far);
-  if(intersect)
-    Log::Info("INTERSECTION",i);
-}
+#endif

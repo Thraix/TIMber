@@ -58,14 +58,24 @@ out FragmentData
   float visibility;
 } gs_out;
 
+vec3 rand(in vec3 pos)
+{
+  vec3 pos2;
+  vec2 uv1 = vec2(pos.x, pos.x);
+  vec2 uv2 = vec2(pos.y, pos.y);
+  vec2 uv3 = vec2(pos.z, pos.z);
+  pos2.x = (texture(noiseTexture, uv1).r-0.5f)*1;
+  pos2.y = (texture(noiseTexture, uv2).r-0.5f)*1;
+  pos2.z = (texture(noiseTexture, uv3).r-0.5f)*1;
+  return pos2;
+}
+
 void main()
 {
   vec3 position = (gs_in[0].worldPos + gs_in[1].worldPos + gs_in[2].worldPos) / 3.0;
-  vec3 surfaceNormal = normalize(cross(gs_in[1].worldPos - gs_in[0].worldPos, gs_in[2].worldPos - gs_in[0].worldPos));
-  surfaceNormal.x += (texture(noiseTexture, vec2(position.x, position.x)/1).r-0.5f) * 1.0f;
-  surfaceNormal.y += (texture(noiseTexture, vec2(position.y, position.y)/1).r-0.5f) * 1.0f;
-  surfaceNormal.z += (texture(noiseTexture, vec2(position.z, position.z)/1).r-0.5f) * 1.0f;
-  surfaceNormal = normalize(surfaceNormal);
+  vec3 surfaceNormal = normalize(cross(
+        gs_in[1].worldPos - gs_in[0].worldPos, 
+        gs_in[2].worldPos - gs_in[0].worldPos)) + rand(position);
   vec3 toLightVector = vec3(-100, 100, 0);
   vec3 toCameraVector = (inverse(viewMatrix) * vec4(0, 0, 0, 1)).xyz - position;
   vec3 unitNormal = normalize(surfaceNormal);

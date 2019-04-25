@@ -31,6 +31,4 @@ class World : public Greet::Scene
     void Render() const override;
     void Update(float timeElapsed) override;
     void OnEvent(Greet::Event& event) override;
-    float GetHeight(const Greet::Vec3<float>& position);
-    void RayCastChunk(int x, int y);
 };
