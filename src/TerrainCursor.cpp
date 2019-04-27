@@ -35,7 +35,6 @@ void TerrainCursor::Render(const Camera& camera, const IntersectionData& interse
   Vec3<float> center = intersection.intersectionPoint;
   material.GetShader().SetUniformMat4("transformationMatrix", Mat4::AlignAxis(center+normal*0.01f, normal, far - near));
 
-
   mesh->Bind();
   mesh->Render();
   mesh->Unbind();

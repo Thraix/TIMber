@@ -53,12 +53,12 @@ class Game : public App
     {
       LineRenderer::CreateInstance();
       Loaders::LoadTextures("res/textures.json");
-      float* noiseMap = Noise::GenNoise(512,512, 5, 32, 32, 0.75f);
+      float* noiseMap = Noise::GenNoise(512, 512, 5, 128, 128, 0.75f);
       BYTE* image = ImageUtils::CreateHeightmapImage(noiseMap, 512, 512);
       TextureManager::Add("noiseMap", Texture2D(image, 512, 512));
 
       crossHair = new Renderable2D({0,0}, {20,20}, 0xffffffff, new Sprite(TextureManager::Get2D("crosshair")), nullptr);
-      //Renderable2D* noiseRenderable = new Renderable2D({0,0}, {512,512}, 0xffffffff, new Sprite(TextureManager::Get2D("noiseMap")), nullptr);
+      Renderable2D* noiseRenderable = new Renderable2D({0,0}, {512,512}, 0xffffffff, new Sprite(TextureManager::Get2D("noiseMap")), nullptr);
       layer = new CrossHairLayer(crossHair);
       // layer->Add(noiseRenderable);
 

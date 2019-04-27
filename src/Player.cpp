@@ -14,12 +14,12 @@ TPCamera Player::CreateCamera()
 Player::Player(World* world, const Greet::Vec3<float>& position)
   : camera{CreateCamera()}, position{position}, world{world}
 {
-  Window::GrabMouse(true);
 }
 
 void Player::OnWorldInit()
 {
   //position.y = world->GetHeight(position);
+  Window::GrabMouse(true);
 }
 
 void Player::Render() const
@@ -161,6 +161,10 @@ void Player::OnEvent(Event& event)
   {
     MouseMoveEvent& e = (MouseMoveEvent&)event;
     camera.Rotate(e.GetDeltaPosition()*0.2);
+  }
+  else if(EVENT_IS_TYPE(event, EventType::MOUSE_PRESS))
+  {
+    world->PlaceVoxels();
   }
 }
 

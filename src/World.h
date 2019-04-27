@@ -34,4 +34,6 @@ class World : public Greet::Scene
     void Render() const override;
     void Update(float timeElapsed) override;
     void OnEvent(Greet::Event& event) override;
+
+    void PlaceVoxels();
 };

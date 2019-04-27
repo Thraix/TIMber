@@ -5,7 +5,7 @@
 using namespace Greet;
 
 World::World(uint width, uint length)
-  : player{this, {0,0,0}},//width * Chunk::CHUNK_WIDTH / 2.0f, 0.0f, length * Chunk::CHUNK_HEIGHT/ 2.0f}},
+  : player{this, {0,0,0}},//width * Chunk::CHUNK_WIDTH / 2.0f, 0.0f, length * Chunk::CHUNK_LENGTH/ 2.0f}},
   skybox{Greet::TextureManager::Get3D("skybox")},
   width{width}, length{length}, terrainMaterial{Greet::Shader::FromFile("res/shaders/terrain.shader")}, noiseTexture{TextureManager::Get2D("noiseMap")}
 {
@@ -61,9 +61,9 @@ void World::Update(float timeElapsed)
   player.Update(timeElapsed);
   Vec3<float> pos = player.GetPosition();
   int chunkMinX = floor((pos.x - player.GetReach()) / (double)Chunk::CHUNK_WIDTH);
-  int chunkMinZ = floor((pos.z- player.GetReach()) / (double)Chunk::CHUNK_HEIGHT);
+  int chunkMinZ = floor((pos.z- player.GetReach()) / (double)Chunk::CHUNK_LENGTH);
   int chunkMaxX = ceil((pos.x + player.GetReach()) / (double)Chunk::CHUNK_WIDTH);
-  int chunkMaxZ = ceil((pos.z + player.GetReach()) / (double)Chunk::CHUNK_HEIGHT);
+  int chunkMaxZ = ceil((pos.z + player.GetReach()) / (double)Chunk::CHUNK_LENGTH);
   chunkIntersection.hasIntersection = false;
   for(int z = chunkMinZ; z < chunkMaxZ; z++)
   {
@@ -88,16 +88,29 @@ void World::OnEvent(Greet::Event& event)
   player.OnEvent(event);
 }
 
+void World::PlaceVoxels()
+{
+  if(chunkIntersection.hasIntersection)
+  {
+    int chunkX = floor(chunkIntersection.intersectionPoint.x / (double)Chunk::CHUNK_WIDTH);
+    int chunkZ = floor(chunkIntersection.intersectionPoint.z / (double)Chunk::CHUNK_LENGTH);
+    if(chunkX >= 0 && chunkX < width && chunkZ >= 0 && chunkZ < length)
+    {
+      chunks[chunkX + chunkZ * width].PlaceVoxels(chunkIntersection.intersectionPoint, 5);
+    }
+  }
+}
+
 #if 0
 float World::GetHeight(const Vec3<float>& position)
 {
   int chunkX = floor(position.x / (double)Chunk::CHUNK_WIDTH);
-  int chunkZ = floor(position.z / (double)Chunk::CHUNK_HEIGHT);
+  int chunkZ = floor(position.z / (double)Chunk::CHUNK_LENGTH);
   if(chunkX < 0 || chunkZ < 0)
     return position.y;
   if(chunkX >= width || chunkZ >= length)
     return position.y;
 
-  return chunks[chunkX + chunkZ * width].GetHeight(position - Vec3<float>(chunkX * Chunk::CHUNK_WIDTH, 0.0f, chunkZ * Chunk::CHUNK_HEIGHT));
+  return chunks[chunkX + chunkZ * width].GetHeight(position - Vec3<float>(chunkX * Chunk::CHUNK_WIDTH, 0.0f, chunkZ * Chunk::CHUNK_LENGTH));
 }
 #endif
