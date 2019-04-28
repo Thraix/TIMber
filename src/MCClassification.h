@@ -16,9 +16,11 @@ class MCClassification
     static Greet::Vec3<float> GetEdgeMidPoint(size_t edge)
     {
       return (vertices[edges[edge].first] + vertices[edges[edge].second])* 0.5f;
+      float t = 0.5f;
+      return t * vertices[edges[edge].first] + (1 - t) * vertices[edges[edge].second];
     }
 
-    static std::vector<Greet::Vec3<Greet::Vec3<float>>> GetMarchingCubeFaces(MCPointData* data, uint x, uint y, uint z, uint width, uint height, uint length)
+    static std::vector<Greet::Vec3<Greet::Vec3<float>>> GetMarchingCubeFaces(const std::vector<MCPointData>& data, uint x, uint y, uint z, uint width, uint height, uint length)
     {
       byte classification = 0;
       for(auto&& vertex : vertices)

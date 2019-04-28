@@ -7,9 +7,9 @@
 
 using namespace Greet;
 
-uint Chunk::CHUNK_WIDTH = 64;
+uint Chunk::CHUNK_WIDTH = 32;
 uint Chunk::CHUNK_HEIGHT = 32;
-uint Chunk::CHUNK_LENGTH = 64;
+uint Chunk::CHUNK_LENGTH = 32;
 
 Chunk::Chunk()
 {}
@@ -26,7 +26,7 @@ void Chunk::Initialize(uint posX, uint posZ)
     delete data;
   }
 
-  voxelData = new MCPointData[(CHUNK_WIDTH+1) * (CHUNK_HEIGHT+1) * (CHUNK_LENGTH+1)];
+  voxelData = std::vector<MCPointData>((CHUNK_WIDTH+1) * (CHUNK_HEIGHT+1) * (CHUNK_LENGTH+1));
   for(int z = 0;z<CHUNK_LENGTH+1;z++)
   {
     for(int y = 0;y<CHUNK_HEIGHT+1;y++)
@@ -38,16 +38,37 @@ void Chunk::Initialize(uint posX, uint posZ)
       }
     }
   }
-  mesh = new MarchingCubes(voxelData, CHUNK_WIDTH+1, CHUNK_HEIGHT+1, CHUNK_LENGTH+1);
+  mesh = new MCMesh(voxelData, CHUNK_WIDTH+1, CHUNK_HEIGHT+1, CHUNK_LENGTH+1);
 }
 
 Chunk::~Chunk()
 {
   delete mesh;
-  delete voxelData;
 }
 
 void Chunk::PlaceVoxels(const Vec3<float>& point, float radius)
+{
+  bool dirty = false;
+  // Vim doesn't like this formatting...
+  SphereOperation(point, radius, [&] (MCPointData& data, int x, int y, int z) 
+      {
+      if(!data.inhabited)
+      {
+      data.inhabited = true;
+      dirty = true;
+      }
+
+      });
+
+  if(dirty)
+  {
+    // A bad implementation just to test it.
+    delete mesh;
+    mesh = new MCMesh(voxelData, CHUNK_WIDTH + 1, CHUNK_HEIGHT + 1, CHUNK_LENGTH + 1);
+  }
+}
+
+void Chunk::SphereOperation(const Vec3<float>& point, float radius, std::function<void(MCPointData&, int, int,int)> func)
 {
   int pX = (int)floor(point.x) - posX * CHUNK_WIDTH;
   int pY = (int)floor(point.y);
@@ -69,22 +90,10 @@ void Chunk::PlaceVoxels(const Vec3<float>& point, float radius)
           continue;
         if((Vec3<float>{x,y,z} - p).Length() < radius)
         {
-          bool& voxel = voxelData[x + (y + z * (CHUNK_HEIGHT+1)) * (CHUNK_WIDTH+1)].inhabited;
-          if(!voxel)
-          {
-            voxel = true;
-            dirty = true;
-          }
+          func(voxelData[x + (y + z * (CHUNK_HEIGHT+1)) * (CHUNK_WIDTH+1)], x, y, z);
         }
       }
     }
-  }
-
-  if(dirty)
-  {
-    // A bad implementation just to test it.
-    delete mesh;
-    mesh = new MarchingCubes(voxelData, CHUNK_WIDTH + 1, CHUNK_HEIGHT + 1, CHUNK_LENGTH + 1);
   }
 }
 
@@ -103,7 +112,7 @@ IntersectionData Chunk::RayCastChunk(const TPCamera& camera)
   {
     static int i = 0;
     i++;
-    IntersectionData data = mesh->GetHalfEdgeMesh()->RayCast(near, far);
+    IntersectionData data = RayCast::MCMeshCast(near, far, *mesh);
     data.v1 = Vec3<float>(GetTransformationMatrix() * data.v1);
     data.v2 = Vec3<float>(GetTransformationMatrix() * data.v2);
     data.v3 = Vec3<float>(GetTransformationMatrix() * data.v3);
