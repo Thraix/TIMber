@@ -24,7 +24,7 @@ MCMesh::MCMesh(const std::vector<MCPointData>& data, uint width, uint height, ui
         std::vector<uint> listFaces;
         for(auto&& face : faces)
         {
-          uint pos = AddFace(face, data[x + (y + z * height )  * width].voxel.color);
+          uint pos = AddFace(face);
           listFaces.push_back(pos);
         }
         voxelFaces.emplace(x + (y + z * (height - 1)) * (width - 1), listFaces);
@@ -52,6 +52,7 @@ MCMesh::MCMesh(const std::vector<MCPointData>& data, uint width, uint height, ui
 
 void MCMesh::UpdateData(const std::vector<MCPointData>& data, int xOffset, int yOffset, int zOffset, uint w, uint h, uint l)
 {
+  memcpy(voxelData.data(), data.data(), voxelData.size() * sizeof(voxelData[0]));
   // Go through all the cubes
   uint minX = std::max(xOffset-1, 0);
   uint minY = std::max(yOffset-1, 0);
@@ -80,13 +81,13 @@ void MCMesh::UpdateData(const std::vector<MCPointData>& data, int xOffset, int y
         {
           if(i < listFaces.size())
           {
-            faces[listFaces[i]].v1 = AddVertex((newFaces[i])[0], data[indexVoxel].voxel.color);
-            faces[listFaces[i]].v2 = AddVertex((newFaces[i])[1], data[indexVoxel].voxel.color);
-            faces[listFaces[i]].v3 = AddVertex((newFaces[i])[2], data[indexVoxel].voxel.color);
+            faces[listFaces[i]].v1 = AddVertex((newFaces[i])[0]);
+            faces[listFaces[i]].v2 = AddVertex((newFaces[i])[1]);
+            faces[listFaces[i]].v3 = AddVertex((newFaces[i])[2]);
           }
           else
           {
-            uint pos = AddFace(newFaces[i], data[indexVoxel].voxel.color);
+            uint pos = AddFace(newFaces[i]);
             listFaces.push_back(pos);
           }
         }
@@ -102,7 +103,6 @@ void MCMesh::UpdateData(const std::vector<MCPointData>& data, int xOffset, int y
       }
     }
   }
-  memcpy(voxelData.data(), data.data(), voxelData.size() * sizeof(voxelData[0]));
 
   UpdateRenderData();
 }
@@ -149,11 +149,11 @@ void MCMesh::UpdateBuffer(Buffer& buffer, void* data, size_t size)
   buffer.Disable();
 }
 
-uint MCMesh::AddFace(const Vec3<Vec3<float>>& verts, const Vec4& color)
+uint MCMesh::AddFace(const Vec3<Vec3<float>>& verts)
 {
-  uint v1 = AddVertex(verts[0], color);
-  uint v2 = AddVertex(verts[1], color);
-  uint v3 = AddVertex(verts[2], color);
+  uint v1 = AddVertex(verts[0]);
+  uint v2 = AddVertex(verts[1]);
+  uint v3 = AddVertex(verts[2]);
 
   uint pos = faces.size();
   Face face{v1,v2,v3};
@@ -174,6 +174,22 @@ uint MCMesh::AddFace(const Vec3<Vec3<float>>& verts, const Vec4& color)
   return pos;
 }
 
+const Vec4& MCMesh::GetColor(const Vec3<float>& vertex)
+{
+  const Vec3<uint> vMin{floor(vertex.x), floor(vertex.y), floor(vertex.z)};
+  const Vec3<uint> vMax{ceil(vertex.x), ceil(vertex.y), ceil(vertex.z)};
+  uint indexMin = vMin.x + (vMin.y + vMin.z * height) * width;
+  if(voxelData[indexMin].inhabited)
+  {
+    return voxelData[indexMin].voxel.color;
+  }
+  else
+  {
+    uint indexMax = vMax.x + (vMax.y + vMax.z * height) * width;
+    return voxelData[indexMax].voxel.color;
+  }
+}
+
 void MCMesh::RemoveFace(uint face)
 {
   fragmentFaces.push(Fragmentation{face, 1});
@@ -184,11 +200,13 @@ void MCMesh::RemoveFace(uint face)
   faces[face].v3 = 0;
 }
 
-uint MCMesh::AddVertex(const Vec3<float>& vertex, const Vec4& color) 
+uint MCMesh::AddVertex(const Vec3<float>& vertex) 
 {
   auto&& it = uniqueVertices.find(vertex);
+
   if(it != uniqueVertices.end())
   {
+    colors[it->second.first] = GetColor(vertex);
     it->second.second++;
     return it->second.first;
   }
@@ -209,7 +227,7 @@ uint MCMesh::AddVertex(const Vec3<float>& vertex, const Vec4& color)
 #endif
   {
     vertices.push_back(vertex);
-    colors.push_back(color);
+    colors.push_back(GetColor(vertex));
   }
   uniqueVertices.emplace(vertex, std::make_pair(pos, 1));
   return pos;

@@ -53,6 +53,16 @@ class Voxel
       return id < rhs.id;
     }
 
+    bool operator!=(const Voxel& rhs)
+    {
+      return id != rhs.id;
+    }
+
+    bool operator==(const Voxel& rhs)
+    {
+      return id == rhs.id;
+    }
+
   public:
     static const Voxel none;
     static const Voxel grass;
@@ -60,4 +70,6 @@ class Voxel
     static const Voxel copper;
     static const Voxel tin;
     static const Voxel snow;
+    static const Voxel wood;
+    static const Voxel leaves;
 };

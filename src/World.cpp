@@ -81,6 +81,14 @@ void World::Update(float timeElapsed)
       } 
     }
   }
+  for(int z = 0;z<length;z++)
+  {
+    for(int x = 0;x<width;x++)
+    {
+      chunks[x + z * width].Update(timeElapsed);
+
+    }
+  }
 }
 
 void World::OnEvent(Greet::Event& event) 

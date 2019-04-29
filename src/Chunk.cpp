@@ -19,9 +19,10 @@ void Chunk::Initialize(uint posX, uint posZ)
   this->posX = posX;
   this->posZ = posZ;
   heightMap = Noise::GenNoise(CHUNK_WIDTH+1, CHUNK_LENGTH+1,4,128, 128,0.75f, posX * CHUNK_WIDTH, posZ * CHUNK_LENGTH);
+  biome = Noise::GenNoise(CHUNK_WIDTH+1, CHUNK_LENGTH+1,4,128, 128,0.5f, (posX+14) * CHUNK_WIDTH, (posZ+12) * CHUNK_LENGTH);
   std::vector<float> caves = Noise::GenNoise(CHUNK_WIDTH+1,CHUNK_HEIGHT+1, CHUNK_LENGTH+1,4,32,32, 32,0.75f, posX * CHUNK_WIDTH, 0, posZ * CHUNK_LENGTH);
 
-  std::vector<float> minerals = Noise::GenNoise(CHUNK_WIDTH+1,CHUNK_HEIGHT+1, CHUNK_LENGTH+1,4,16,16, 32,0.25f, posX * CHUNK_WIDTH, CHUNK_HEIGHT, posZ * CHUNK_LENGTH);
+  std::vector<float> minerals = Noise::GenNoise(CHUNK_WIDTH+1,CHUNK_HEIGHT+1, CHUNK_LENGTH+1,2,2,2,2,0.95f, posX * CHUNK_WIDTH, CHUNK_HEIGHT, posZ * CHUNK_LENGTH);
 
   {
     MeshData* data = MeshFactory::LowPolyGrid((CHUNK_WIDTH)/2.0,0,(CHUNK_LENGTH)/2.0,CHUNK_WIDTH, CHUNK_LENGTH,CHUNK_WIDTH, CHUNK_LENGTH,heightMap, CHUNK_HEIGHT+1);
@@ -30,32 +31,81 @@ void Chunk::Initialize(uint posX, uint posZ)
   }
 
   voxelData = std::vector<MCPointData>((CHUNK_WIDTH+1) * (CHUNK_HEIGHT+1) * (CHUNK_LENGTH+1));
+  float min = 1.0f;
+  float max = 0.0f;
   for(int z = 0;z<CHUNK_LENGTH+1;z++)
   {
     for(int y = 0;y<CHUNK_HEIGHT+1;y++)
     {
       for(int x = 0;x<CHUNK_WIDTH+1;x++)
       {
-        int index = x + y * (CHUNK_WIDTH+1) + z * (CHUNK_WIDTH+1) * (CHUNK_HEIGHT+1);
+        int index = x + (y + z * (CHUNK_WIDTH+1)) * (CHUNK_HEIGHT+1);
         int indexHeight = x + z * (CHUNK_WIDTH+1);
         voxelData[index].inhabited = heightMap[indexHeight] * (CHUNK_HEIGHT+1) > y && (caves[index] < 0.48 || caves[index] > 0.52);
         voxelData[index].voxel = Voxel::stone;
-        if(minerals[index] > 0.67)
+
+        // Temporary
+        if(minerals[index] < min) min = minerals[index];
+        if(minerals[index] > max) max = minerals[index];
+        voxelData[index].magnitude = (minerals[index] - 0.20f) / 0.80f;
+        Math::Clamp(&(voxelData[index].magnitude), 0.01f, 0.99f);
+        if(minerals[index] > 0.60)
           voxelData[index].voxel = Voxel::copper;
-        if(minerals[index] < 0.33)
+        if(minerals[index] < 0.40)
           voxelData[index].voxel = Voxel::tin;
         if(heightMap[indexHeight] * (CHUNK_HEIGHT+1) - 4 < y)
+        {
           voxelData[index].voxel = Voxel::grass;
+        }
       }
     }
   }
-  voxelData[10 + 10 * (CHUNK_WIDTH+1) + 10 * (CHUNK_WIDTH+1) * (CHUNK_HEIGHT+1)].inhabited = true;
+  Log::Info(min, ":", max);
+  AddTree(4, heightMap[4 + 4 * (CHUNK_WIDTH+1)] * (CHUNK_HEIGHT+1),4);
+  for(int z = 0;z<CHUNK_LENGTH+1;z++)
+  {
+    for(int x = 0;x<CHUNK_WIDTH+1;x++)
+    { 
+      int indexHeight = x + z * (CHUNK_WIDTH+1);
+      if(biome[indexHeight] > 0.55)
+        for(int y = CHUNK_HEIGHT;y>=0;y--)
+        {
+          int index = x + y * (CHUNK_WIDTH+1) + z * (CHUNK_WIDTH+1) * (CHUNK_HEIGHT+1);
+          if(voxelData[index].inhabited)
+          {
+            voxelData[index].voxel = Voxel::snow;
+            break;
+          }
+        }
+    }
+  }
   mesh = new MCMesh(voxelData, CHUNK_WIDTH+1, CHUNK_HEIGHT+1, CHUNK_LENGTH+1);
 }
 
 Chunk::~Chunk()
 {
   delete mesh;
+}
+
+void Chunk::AddTree(uint x, uint y, uint z)
+{
+  for(int i = y; i < y + 5; i++)
+  {
+    uint index = x + i * (CHUNK_WIDTH+1) + z * (CHUNK_WIDTH+1) * (CHUNK_HEIGHT+1);
+    voxelData[index].inhabited = true;
+    voxelData[index].voxel = Voxel::wood;
+    //voxelData[index].magnitude = 0.5f;
+  }
+  // Vim doesn't like this formatting...
+  SphereOperation(Vec3<float>(x + posX * CHUNK_WIDTH,y + 5, z + posZ * CHUNK_LENGTH), 3, [&] (MCPointData& data, int x, int y, int z) 
+      {
+      if(!data.inhabited)
+      {
+      data.inhabited = true;
+      data.voxel = Voxel::leaves;
+      }
+      } );
+
 }
 
 void Chunk::PlaceVoxels(const Vec3<float>& point, float radius)
@@ -172,4 +222,37 @@ IntersectionData Chunk::RayCastChunk(const TPCamera& camera)
     return data;
   }
   return IntersectionData();
+}
+
+void Chunk::Update(float timeElapsed)
+{
+  static float timer = 0;
+  timer += timeElapsed;
+  if(timer > 1 / 20.0f)
+  {
+    bool dirty;
+    for(int i = 0;i<5;i++)
+    {
+      int x = rand() % (CHUNK_WIDTH+1);
+      int z = rand() % (CHUNK_LENGTH+1);
+      int indexHeight = x + z * (CHUNK_WIDTH+1);
+      if(biome[indexHeight] > 0.55)
+      {
+        for(int y = CHUNK_HEIGHT;y>=0;y--)
+        {
+          int index = x + y * (CHUNK_WIDTH+1) + z * (CHUNK_WIDTH+1) * (CHUNK_HEIGHT+1);
+          if(voxelData[index].inhabited)
+          {
+            if(voxelData[index].voxel != Voxel::snow)
+            {
+              voxelData[index].voxel = Voxel::snow;
+              mesh->UpdateData(voxelData, x,y,z, 1, 1, 1);
+            }
+            break;
+          }
+
+        }
+      } 
+    } 
+  }
 }

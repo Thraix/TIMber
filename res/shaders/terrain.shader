@@ -74,8 +74,8 @@ void main()
   vec3 position = (gs_in[0].worldPos + gs_in[1].worldPos + gs_in[2].worldPos) / 3.0;
   vec3 surfaceNormal = normalize(cross(
         gs_in[1].worldPos - gs_in[0].worldPos, 
-        gs_in[2].worldPos - gs_in[0].worldPos)) + rand(position);
-  vec3 toLightVector = vec3(-100, 100, 0);
+        gs_in[2].worldPos - gs_in[0].worldPos));// + rand(position);
+  vec3 toLightVector = vec3(100, 100, 0);
   vec3 toCameraVector = (inverse(viewMatrix) * vec4(0, 0, 0, 1)).xyz - position;
   vec3 unitNormal = normalize(surfaceNormal);
   vec3 unitLightVector = normalize(toLightVector);

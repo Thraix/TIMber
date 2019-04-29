@@ -16,7 +16,7 @@
   "copper": {
     "id": 3,
     "name": "Copper Ore",
-    "color": "#a4430e"
+    "color": "#f47631"
   },
   "tin": {
     "id": 4,
@@ -27,5 +27,15 @@
     "id": 5,
     "name": "Snow",
     "color": "#ffffff"
+  },
+  "wood": {
+    "id": 6,
+    "name": "Wood",
+    "color": "#6b4100"
+  },
+  "leaves": {
+    "id": 7,
+    "name": "Leaves",
+    "color": "#009900"
   }
 }

@@ -18,13 +18,17 @@ class Chunk
     std::vector<MCPointData> voxelData;
     Greet::Mesh* originalMesh;
     float* heightMap;
+    float* biome;
     uint posX;
     uint posZ;
   private:
     Chunk();
     void Initialize(uint posX, uint posY);
+    void AddTree(uint x, uint y, uint z);
   public:
     virtual ~Chunk();
+    void Update(float timeElapsed);
+
     Greet::Mat4 GetTransformationMatrix() const { return Greet::Mat4::Translate({posX * CHUNK_WIDTH, 0 , posZ * CHUNK_LENGTH});}
     IntersectionData RayCastChunk(const Greet::TPCamera& camera);
 

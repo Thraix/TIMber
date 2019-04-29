@@ -67,8 +67,9 @@ class MCMesh
     const std::vector<Face>& GetFaces() const { return faces; } 
     const std::vector<Greet::Vec3<float>>& GetVertices() const { return vertices; } 
   private:
-    uint AddFace(const Greet::Vec3<Greet::Vec3<float>>& vertices, const Greet::Vec4& color);
+    const Greet::Vec4& GetColor(const Greet::Vec3<float>& vertex);
+    uint AddFace(const Greet::Vec3<Greet::Vec3<float>>& vertices);
     void RemoveFace(uint face);
-    uint AddVertex(const Greet::Vec3<float>& vertex, const Greet::Vec4& color);
+    uint AddVertex(const Greet::Vec3<float>& vertex);
 };
 

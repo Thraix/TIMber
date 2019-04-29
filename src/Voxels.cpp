@@ -12,3 +12,5 @@ const Voxel Voxel::stone = Voxel{"stone"};
 const Voxel Voxel::copper = Voxel{"copper"};
 const Voxel Voxel::tin = Voxel{"tin"};
 const Voxel Voxel::snow = Voxel{"snow"};
+const Voxel Voxel::wood = Voxel{"wood"};
+const Voxel Voxel::leaves = Voxel{"leaves"};

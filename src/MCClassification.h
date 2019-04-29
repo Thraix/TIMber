@@ -13,11 +13,23 @@ class MCClassification
     static std::vector<std::vector<Greet::Vec3<size_t>>> classifications;
 
   public:
-    static Greet::Vec3<float> GetEdgeMidPoint(size_t edge)
+    static Greet::Vec3<float> GetEdgeMidPoint(size_t edge, const std::vector<MCPointData>& data, uint x, uint y, uint z, uint width, uint height, uint length)
     {
-      return (vertices[edges[edge].first] + vertices[edges[edge].second])* 0.5f;
-      float t = 0.5f;
-      return t * vertices[edges[edge].first] + (1 - t) * vertices[edges[edge].second];
+      Greet::Vec3<float> v1 = vertices[edges[edge].first];
+      Greet::Vec3<float> v2 = vertices[edges[edge].second];
+      MCPointData d1 = data[(x + v1.x) + ((y + v1.y) + (z + v1.z) * height) * width];
+      MCPointData d2 = data[(x + v2.x) + ((y + v2.y) + (z + v2.z) * height) * width];
+
+      float t = 0.5;
+      if(d1.inhabited)
+      {
+        t = 1.0f - d1.magnitude;
+      }
+      else
+      {
+        t = d2.magnitude;
+      }
+      return t * v1 + (1 - t) * v2;
     }
 
     static std::vector<Greet::Vec3<Greet::Vec3<float>>> GetMarchingCubeFaces(const std::vector<MCPointData>& data, uint x, uint y, uint z, uint width, uint height, uint length)
@@ -36,9 +48,9 @@ class MCClassification
       for(auto&& edges : faces)
       {
         result.push_back({
-            GetEdgeMidPoint(edges[1])+offset,
-            GetEdgeMidPoint(edges[0])+offset,
-            GetEdgeMidPoint(edges[2])+offset
+            GetEdgeMidPoint(edges[1],data,x,y,z, width, height, length)+offset,
+            GetEdgeMidPoint(edges[0],data,x,y,z, width, height, length)+offset,
+            GetEdgeMidPoint(edges[2],data,x,y,z, width, height, length)+offset
             });
       }
       return result;
