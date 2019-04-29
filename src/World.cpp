@@ -94,9 +94,16 @@ void World::PlaceVoxels()
   {
     int chunkX = floor(chunkIntersection.intersectionPoint.x / (double)Chunk::CHUNK_WIDTH);
     int chunkZ = floor(chunkIntersection.intersectionPoint.z / (double)Chunk::CHUNK_LENGTH);
-    if(chunkX >= 0 && chunkX < width && chunkZ >= 0 && chunkZ < length)
+    for(int z = chunkZ - 1; z< chunkZ + 2; z++)
     {
-      chunks[chunkX + chunkZ * width].PlaceVoxels(chunkIntersection.intersectionPoint, 5);
+      if(z >= 0 && z < length)
+      {
+        for(int x = chunkX - 1; x < chunkX + 2; x++)
+        {
+          if(x >= 0 && x < width)
+            chunks[x + z * width].PlaceVoxels(chunkIntersection.intersectionPoint, 2);
+        }
+      }
     }
   }
 }

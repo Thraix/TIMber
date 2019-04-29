@@ -80,6 +80,15 @@ IntersectionData RayCast::MCMeshCast(const Vec3<float>& near, const Vec3<float>&
     Vec3<float> v1 = mesh.GetVertices()[face.v1];
     Vec3<float> v2 = mesh.GetVertices()[face.v2];
     Vec3<float> v3 = mesh.GetVertices()[face.v3];
+    Vec3<float> cross = (v2 - v1).Cross(v3 - v1);
+    // Since the mesh can have invalid faces we need to check that the cross product is valid.
+    if(cross == Vec3{0.0f})
+      continue;
+    // Check so that the normals are facing opposite directions.
+    // This is so that we are not raytracing triangles that are facing
+    // away from us.
+    if(cross.Dot(far - near) > 0)
+      continue;
     if(NegativeVolumeTetrahedron(near, v1, v2, v3) != NegativeVolumeTetrahedron(far,v1,v2,v3))
     {
       bool s1 = NegativeVolumeTetrahedron(near, far, v1, v2);

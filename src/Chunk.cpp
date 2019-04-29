@@ -38,6 +38,7 @@ void Chunk::Initialize(uint posX, uint posZ)
       }
     }
   }
+  voxelData[10 + 10 * (CHUNK_WIDTH+1) + 10 * (CHUNK_WIDTH+1) * (CHUNK_HEIGHT+1)].inhabited = true;
   mesh = new MCMesh(voxelData, CHUNK_WIDTH+1, CHUNK_HEIGHT+1, CHUNK_LENGTH+1);
 }
 
@@ -49,6 +50,12 @@ Chunk::~Chunk()
 void Chunk::PlaceVoxels(const Vec3<float>& point, float radius)
 {
   bool dirty = false;
+  uint maxX = 0;
+  uint maxY = 0;
+  uint maxZ = 0;
+  uint minX = CHUNK_WIDTH;
+  uint minY = CHUNK_HEIGHT;
+  uint minZ = CHUNK_LENGTH;
   // Vim doesn't like this formatting...
   SphereOperation(point, radius, [&] (MCPointData& data, int x, int y, int z) 
       {
@@ -56,15 +63,18 @@ void Chunk::PlaceVoxels(const Vec3<float>& point, float radius)
       {
       data.inhabited = true;
       dirty = true;
+      if(x < minX) minX = x;
+      if(y < minY) minY = y;
+      if(z < minZ) minZ = z;
+      if(x > maxX) maxX = x;
+      if(y > maxY) maxY = y;
+      if(z > maxZ) maxZ = z;
       }
-
       });
 
   if(dirty)
   {
-    // A bad implementation just to test it.
-    delete mesh;
-    mesh = new MCMesh(voxelData, CHUNK_WIDTH + 1, CHUNK_HEIGHT + 1, CHUNK_LENGTH + 1);
+    mesh->UpdateData(voxelData, minX, minY, minZ, maxX - minX + 1, maxY - minY + 1, maxZ - minZ + 1); 
   }
 }
 
