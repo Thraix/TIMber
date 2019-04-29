@@ -2,8 +2,7 @@
 #version 330 core
 
 layout(location = 0) in vec3 position;
-layout(location = 2) in vec4 color;
-layout(location = 3) in vec3 normal;
+layout(location = 1) in vec4 color;
 
 out VertexData
 {
@@ -20,7 +19,7 @@ const float gradient = 1.5;
 
 void main()
 {
-  vs_out.color = vec4(0,1,0,1);//vec4(color.b, color.g, color.r, color.a);
+  vs_out.color = color;
   vec4 worldPosition = transformationMatrix * vec4(position, 1.0f);
   vec4 positionRelativeToCamera = viewMatrix * worldPosition;
 
@@ -94,7 +93,7 @@ void main()
   {
     gl_Position = gl_in[i].gl_Position;
     gs_out.visibility = gs_in[i].visibility;
-    gs_out.color = color;
+    gs_out.color = gs_in[i].color * vec4(diffuse, 1.0f);
 
     EmitVertex();
   }

@@ -36,4 +36,5 @@ class World : public Greet::Scene
     void OnEvent(Greet::Event& event) override;
 
     void PlaceVoxels();
+    void RemoveVoxels();
 };

@@ -8,7 +8,8 @@ using namespace Greet;
 
 MCMesh::MCMesh(const std::vector<MCPointData>& data, uint width, uint height, uint length)
   : vao{}, 
-  vbo{0, BufferType::ARRAY, BufferDrawType::DYNAMIC}, 
+  vbo_position{0, BufferType::ARRAY, BufferDrawType::DYNAMIC}, 
+  vbo_color{0, BufferType::ARRAY, BufferDrawType::DYNAMIC}, 
   ibo{0, BufferType::INDEX, BufferDrawType::DYNAMIC},
   voxelData{data}, width{width}, height{height}, length{length}
 {
@@ -23,7 +24,7 @@ MCMesh::MCMesh(const std::vector<MCPointData>& data, uint width, uint height, ui
         std::vector<uint> listFaces;
         for(auto&& face : faces)
         {
-          uint pos = AddFace(face);
+          uint pos = AddFace(face, data[x + (y + z * height )  * width].voxel.color);
           listFaces.push_back(pos);
         }
         voxelFaces.emplace(x + (y + z * (height - 1)) * (width - 1), listFaces);
@@ -31,13 +32,17 @@ MCMesh::MCMesh(const std::vector<MCPointData>& data, uint width, uint height, ui
     }
   }
   vao.Enable();
-  vbo.Enable();
-
-  vbo.UpdateData(vertices.data(), vertices.size() * sizeof(Vec3<float>));
+  vbo_position.Enable();
+  vbo_position.UpdateData(vertices.data(), vertices.size() * sizeof(Vec3<float>));
   GLCall(glEnableVertexAttribArray(0));
   GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0));
+  vbo_position.Disable();
 
-  vbo.Disable();
+  vbo_color.Enable();
+  vbo_color.UpdateData(colors.data(), colors.size() * sizeof(Vec4));
+  GLCall(glEnableVertexAttribArray(1));
+  GLCall(glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0));
+  vbo_color.Disable();
 
   ibo.Enable();
   ibo.UpdateData(faces.data(),faces.size() * 3 * sizeof(uint));
@@ -63,6 +68,7 @@ void MCMesh::UpdateData(const std::vector<MCPointData>& data, int xOffset, int y
         std::vector<Greet::Vec3<Greet::Vec3<float>>> newFaces = MCClassification::GetMarchingCubeFaces(data, x, y, z, width, height, length);
 
         uint index = x + (y + z * (height - 1)) * (width - 1);
+        uint indexVoxel = x + (y + z * height) * width;
         auto&& it = voxelFaces.find(index);
         std::vector<uint> listFaces;
         if(it != voxelFaces.end())
@@ -74,13 +80,13 @@ void MCMesh::UpdateData(const std::vector<MCPointData>& data, int xOffset, int y
         {
           if(i < listFaces.size())
           {
-            faces[listFaces[i]].v1 = AddVertex((newFaces[i])[0]);
-            faces[listFaces[i]].v2 = AddVertex((newFaces[i])[1]);
-            faces[listFaces[i]].v3 = AddVertex((newFaces[i])[2]);
+            faces[listFaces[i]].v1 = AddVertex((newFaces[i])[0], data[indexVoxel].voxel.color);
+            faces[listFaces[i]].v2 = AddVertex((newFaces[i])[1], data[indexVoxel].voxel.color);
+            faces[listFaces[i]].v3 = AddVertex((newFaces[i])[2], data[indexVoxel].voxel.color);
           }
           else
           {
-            uint pos = AddFace(newFaces[i]);
+            uint pos = AddFace(newFaces[i], data[indexVoxel].voxel.color);
             listFaces.push_back(pos);
           }
         }
@@ -104,7 +110,7 @@ void MCMesh::UpdateData(const std::vector<MCPointData>& data, int xOffset, int y
 void MCMesh::Bind()
 {
   vao.Enable();
-  vbo.Enable();
+  vbo_position.Enable();
   ibo.Enable();
   GLCall(glEnable(GL_CULL_FACE));
   GLCall(glFrontFace(GL_CCW));
@@ -116,44 +122,38 @@ void MCMesh::Render()
 void MCMesh::Unbind()
 {
   ibo.Disable();
-  vbo.Disable();
+  vbo_position.Disable();
   vao.Disable();
 }
 
 void MCMesh::UpdateRenderData()
 {
-  vbo.Enable();
-  if(vbo.GetDataSize() < vertices.size()*sizeof(Vec3<float>))
-  {
-    vbo.UpdateData(vertices.data(), vertices.size() * sizeof(Vec3<float>));
-  }
-  else
-  {
-    Vec3<float>* verts = (Vec3<float>*)vbo.MapBuffer();
-    memcpy(verts, vertices.data(), vertices.size() * sizeof(Vec3<float>));
-    vbo.UnmapBuffer();
-  }
-  vbo.Disable();
-
-  ibo.Enable();
-  if(ibo.GetDataSize() < faces.size() * 3 * sizeof(uint))
-  {
-    ibo.UpdateData(faces.data(), faces.size() * 3 * sizeof(uint));
-  }
-  else
-  {
-    uint* indices = (uint*)ibo.MapBuffer();
-    memcpy(indices, faces.data(), faces.size() * 3 * sizeof(uint));
-    ibo.UnmapBuffer();
-  }
-  ibo.Disable();
+  UpdateBuffer(vbo_position, vertices.data(), vertices.size() * sizeof(Vec3<float>));
+  UpdateBuffer(vbo_color, colors.data(), colors.size() * sizeof(Vec4));
+  UpdateBuffer(ibo, faces.data(), faces.size() * 3 * sizeof(uint));
 }
 
-uint MCMesh::AddFace(const Vec3<Vec3<float>>& verts)
+void MCMesh::UpdateBuffer(Buffer& buffer, void* data, size_t size)
 {
-  uint v1 = AddVertex(verts[0]);
-  uint v2 = AddVertex(verts[1]);
-  uint v3 = AddVertex(verts[2]);
+  buffer.Enable();
+  if(buffer.GetDataSize() < size)
+  {
+    buffer.UpdateData(data, size);
+  }
+  else
+  {
+    void* mapping = buffer.MapBuffer();
+    memcpy(mapping, data, size);
+    buffer.UnmapBuffer();
+  }
+  buffer.Disable();
+}
+
+uint MCMesh::AddFace(const Vec3<Vec3<float>>& verts, const Vec4& color)
+{
+  uint v1 = AddVertex(verts[0], color);
+  uint v2 = AddVertex(verts[1], color);
+  uint v3 = AddVertex(verts[2], color);
 
   uint pos = faces.size();
   Face face{v1,v2,v3};
@@ -184,7 +184,7 @@ void MCMesh::RemoveFace(uint face)
   faces[face].v3 = 0;
 }
 
-uint MCMesh::AddVertex(const Vec3<float>& vertex) 
+uint MCMesh::AddVertex(const Vec3<float>& vertex, const Vec4& color) 
 {
   auto&& it = uniqueVertices.find(vertex);
   if(it != uniqueVertices.end())
@@ -207,7 +207,10 @@ uint MCMesh::AddVertex(const Vec3<float>& vertex)
   }
   else
 #endif
+  {
     vertices.push_back(vertex);
+    colors.push_back(color);
+  }
   uniqueVertices.emplace(vertex, std::make_pair(pos, 1));
   return pos;
 }

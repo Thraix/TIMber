@@ -20,6 +20,9 @@ void Chunk::Initialize(uint posX, uint posZ)
   this->posZ = posZ;
   heightMap = Noise::GenNoise(CHUNK_WIDTH+1, CHUNK_LENGTH+1,4,128, 128,0.75f, posX * CHUNK_WIDTH, posZ * CHUNK_LENGTH);
   std::vector<float> caves = Noise::GenNoise(CHUNK_WIDTH+1,CHUNK_HEIGHT+1, CHUNK_LENGTH+1,4,32,32, 32,0.75f, posX * CHUNK_WIDTH, 0, posZ * CHUNK_LENGTH);
+
+  std::vector<float> minerals = Noise::GenNoise(CHUNK_WIDTH+1,CHUNK_HEIGHT+1, CHUNK_LENGTH+1,4,16,16, 32,0.25f, posX * CHUNK_WIDTH, CHUNK_HEIGHT, posZ * CHUNK_LENGTH);
+
   {
     MeshData* data = MeshFactory::LowPolyGrid((CHUNK_WIDTH)/2.0,0,(CHUNK_LENGTH)/2.0,CHUNK_WIDTH, CHUNK_LENGTH,CHUNK_WIDTH, CHUNK_LENGTH,heightMap, CHUNK_HEIGHT+1);
     originalMesh= new Mesh(data);
@@ -34,7 +37,15 @@ void Chunk::Initialize(uint posX, uint posZ)
       for(int x = 0;x<CHUNK_WIDTH+1;x++)
       {
         int index = x + y * (CHUNK_WIDTH+1) + z * (CHUNK_WIDTH+1) * (CHUNK_HEIGHT+1);
-        voxelData[index].inhabited = heightMap[x + z * (CHUNK_WIDTH+1)] * (CHUNK_HEIGHT+1) > y && (caves[index] < 0.48 || caves[index] > 0.52);
+        int indexHeight = x + z * (CHUNK_WIDTH+1);
+        voxelData[index].inhabited = heightMap[indexHeight] * (CHUNK_HEIGHT+1) > y && (caves[index] < 0.48 || caves[index] > 0.52);
+        voxelData[index].voxel = Voxel::stone;
+        if(minerals[index] > 0.67)
+          voxelData[index].voxel = Voxel::copper;
+        if(minerals[index] < 0.33)
+          voxelData[index].voxel = Voxel::tin;
+        if(heightMap[indexHeight] * (CHUNK_HEIGHT+1) - 4 < y)
+          voxelData[index].voxel = Voxel::grass;
       }
     }
   }
@@ -62,6 +73,37 @@ void Chunk::PlaceVoxels(const Vec3<float>& point, float radius)
       if(!data.inhabited)
       {
       data.inhabited = true;
+      dirty = true;
+      if(x < minX) minX = x;
+      if(y < minY) minY = y;
+      if(z < minZ) minZ = z;
+      if(x > maxX) maxX = x;
+      if(y > maxY) maxY = y;
+      if(z > maxZ) maxZ = z;
+      }
+      });
+
+  if(dirty)
+  {
+    mesh->UpdateData(voxelData, minX, minY, minZ, maxX - minX + 1, maxY - minY + 1, maxZ - minZ + 1); 
+  }
+}
+
+void Chunk::RemoveVoxels(const Vec3<float>& point, float radius)
+{
+  bool dirty = false;
+  uint maxX = 0;
+  uint maxY = 0;
+  uint maxZ = 0;
+  uint minX = CHUNK_WIDTH;
+  uint minY = CHUNK_HEIGHT;
+  uint minZ = CHUNK_LENGTH;
+  // Vim doesn't like this formatting...
+  SphereOperation(point, radius, [&] (MCPointData& data, int x, int y, int z) 
+      {
+      if(data.inhabited)
+      {
+      data.inhabited = false;
       dirty = true;
       if(x < minX) minX = x;
       if(y < minY) minY = y;

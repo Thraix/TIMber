@@ -34,7 +34,8 @@ class MCMesh
 {
   private:
     // Rendering data
-    Greet::Buffer vbo;
+    Greet::Buffer vbo_position;
+    Greet::Buffer vbo_color;
     Greet::VertexArray vao;
     Greet::Buffer ibo;
 
@@ -43,6 +44,8 @@ class MCMesh
     uint width, height, length;
 
     std::vector<Greet::Vec3<float>> vertices;
+    std::vector<Greet::Vec4> colors;
+
     std::vector<Face> faces; 
     // Keep track of unique vertices, with the pair <position, count>
     std::map<Greet::Vec3<float>, std::pair<uint, uint>> uniqueVertices;
@@ -55,6 +58,7 @@ class MCMesh
 
     void UpdateRenderData();
     void UpdateData(const std::vector<MCPointData>& data, int xOffset, int yOffset, int zOffset, uint w, uint h, uint l);
+    void UpdateBuffer(Greet::Buffer& buffer, void* data, size_t size);
 
     void Bind();
     void Render();
@@ -63,8 +67,8 @@ class MCMesh
     const std::vector<Face>& GetFaces() const { return faces; } 
     const std::vector<Greet::Vec3<float>>& GetVertices() const { return vertices; } 
   private:
-    uint AddFace(const Greet::Vec3<Greet::Vec3<float>>& vertices);
+    uint AddFace(const Greet::Vec3<Greet::Vec3<float>>& vertices, const Greet::Vec4& color);
     void RemoveFace(uint face);
-    uint AddVertex(const Greet::Vec3<float>& vertex);
+    uint AddVertex(const Greet::Vec3<float>& vertex, const Greet::Vec4& color);
 };
 

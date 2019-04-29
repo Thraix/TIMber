@@ -30,4 +30,5 @@ class Chunk
 
     void SphereOperation(const Greet::Vec3<float>& point, float radius, std::function<void(MCPointData&, int, int, int)> func);
     void PlaceVoxels(const Greet::Vec3<float>& point, float radius);
+    void RemoveVoxels(const Greet::Vec3<float>& point, float radius);
 };

@@ -1,0 +1,31 @@
+{
+  "none": {
+    "id": 0,
+    "name": "Air"
+  },
+  "grass": {
+    "id": 1,
+    "name": "Grass",
+    "color": "#00ff00"
+  },
+  "stone": {
+    "id": 2,
+    "name": "Stone",
+    "color": "#888888"
+  },
+  "copper": {
+    "id": 3,
+    "name": "Copper Ore",
+    "color": "#a4430e"
+  },
+  "tin": {
+    "id": 4,
+    "name": "Tin Ore",
+    "color": "#eaeaea"
+  },
+  "snow": {
+    "id": 5,
+    "name": "Snow",
+    "color": "#ffffff"
+  }
+}

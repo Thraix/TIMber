@@ -108,6 +108,27 @@ void World::PlaceVoxels()
   }
 }
 
+
+void World::RemoveVoxels()
+{
+  if(chunkIntersection.hasIntersection)
+  {
+    int chunkX = floor(chunkIntersection.intersectionPoint.x / (double)Chunk::CHUNK_WIDTH);
+    int chunkZ = floor(chunkIntersection.intersectionPoint.z / (double)Chunk::CHUNK_LENGTH);
+    for(int z = chunkZ - 1; z< chunkZ + 2; z++)
+    {
+      if(z >= 0 && z < length)
+      {
+        for(int x = chunkX - 1; x < chunkX + 2; x++)
+        {
+          if(x >= 0 && x < width)
+            chunks[x + z * width].RemoveVoxels(chunkIntersection.intersectionPoint, 2);
+        }
+      }
+    }
+  }
+}
+
 #if 0
 float World::GetHeight(const Vec3<float>& position)
 {
