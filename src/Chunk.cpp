@@ -30,8 +30,13 @@ void Chunk::Initialize(uint posX, uint posZ)
     originalMesh= new Mesh(data);
     delete data;
   }
-
   voxelData = std::vector<MCPointData>((CHUNK_WIDTH+1) * (CHUNK_HEIGHT+1) * (CHUNK_LENGTH+1));
+#if 0
+  voxelData[10 + (10 + 10 * (CHUNK_WIDTH+1)) * (CHUNK_HEIGHT+1)].inhabited = true;
+  voxelData[11 + (10 + 10 * (CHUNK_WIDTH+1)) * (CHUNK_HEIGHT+1)].inhabited = true;
+  mesh = new MCMesh(voxelData, CHUNK_WIDTH+1, CHUNK_HEIGHT+1, CHUNK_LENGTH+1);
+  return;
+#endif
   float min = 1.0f;
   float max = 0.0f;
   for(int z = 0;z<CHUNK_LENGTH+1;z++)
@@ -40,7 +45,7 @@ void Chunk::Initialize(uint posX, uint posZ)
     {
       for(int x = 0;x<CHUNK_WIDTH+1;x++)
       {
-        int index = x + (y + z * (CHUNK_WIDTH+1)) * (CHUNK_HEIGHT+1);
+        int index = x + (y + z * (CHUNK_HEIGHT+1)) * (CHUNK_WIDTH+1);
         int indexHeight = x + z * (CHUNK_WIDTH+1);
         voxelData[index].inhabited = heightMap[indexHeight] * (CHUNK_HEIGHT+1) > y && (caves[index] < 0.48 || caves[index] > 0.52);
         if(heightMap[indexHeight] * (CHUNK_HEIGHT+1) < y + 1 && voxelData[index].inhabited)
@@ -122,6 +127,11 @@ void Chunk::AddTree(uint x, uint y, uint z)
 
 void Chunk::PlaceVoxels(const Vec3<float>& point, float radius)
 {
+#if 0
+  voxelData[9 + (10 + 10 * (CHUNK_WIDTH+1)) * (CHUNK_HEIGHT+1)].inhabited = true;
+  mesh->UpdateData(voxelData, 9, 10, 10, 1, 1, 1); 
+  return;
+#endif
   bool dirty = false;
   uint maxX = 0;
   uint maxY = 0;
@@ -258,6 +268,7 @@ IntersectionData Chunk::RayCastChunk(const TPCamera& camera)
 
 void Chunk::Update(float timeElapsed)
 {
+  return;
   static float timer = 0;
   timer += timeElapsed;
   if(timer > 1 / 20.0f)

@@ -7,10 +7,10 @@
 
 class MCClassification 
 {
-  private:
-    static std::vector<Greet::Vec3<float>> vertices;
-    static std::vector<std::pair<size_t, size_t>> edges;
-    static std::vector<std::vector<Greet::Vec3<size_t>>> classifications;
+  public:
+    static const std::vector<Greet::Vec3<float>> vertices;
+    static const std::vector<std::pair<size_t, size_t>> edges;
+    static const std::vector<std::vector<Greet::Vec3<size_t>>> classifications;
 
   public:
     static Greet::Vec3<float> GetEdgeMidPoint(size_t edge, const std::vector<MCPointData>& data, uint x, uint y, uint z, uint width, uint height, uint length)
@@ -32,7 +32,7 @@ class MCClassification
       return t * v1 + (1 - t) * v2;
     }
 
-    static std::vector<Greet::Vec3<Greet::Vec3<float>>> GetMarchingCubeFaces(const std::vector<MCPointData>& data, uint x, uint y, uint z, uint width, uint height, uint length)
+    static std::vector<Greet::Vec3<size_t>> GetMarchingCubeFaces(const std::vector<MCPointData>& data, uint x, uint y, uint z, uint width, uint height, uint length)
     {
       byte classification = 0;
       for(auto&& vertex : vertices)
@@ -43,14 +43,14 @@ class MCClassification
           classification |= 0x80; // 0b1000000
       }
       std::vector<Greet::Vec3<size_t>> faces = classifications[classification];
-      std::vector<Greet::Vec3<Greet::Vec3<float>>> result;
+      std::vector<Greet::Vec3<size_t>> result;
       Greet::Vec3<float> offset{x,y,z};
       for(auto&& edges : faces)
       {
         result.push_back({
-            GetEdgeMidPoint(edges[1],data,x,y,z, width, height, length)+offset,
-            GetEdgeMidPoint(edges[0],data,x,y,z, width, height, length)+offset,
-            GetEdgeMidPoint(edges[2],data,x,y,z, width, height, length)+offset
+            edges[1],
+            edges[0],
+            edges[2]
             });
       }
       return result;

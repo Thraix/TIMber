@@ -4,7 +4,7 @@ using namespace Greet;
 
 // All this data is taken from https://github.com/BorisTheBrave/mc-dc/blob/a165b326849d8814fb03c963ad33a9faf6cc6dea/marching_cubes_3d.py#L38
 // Thank you BorisTheBrave for making this process so much easier and not licensing it!
-std::vector<Vec3<float>> MCClassification::vertices = {
+const std::vector<Vec3<float>> MCClassification::vertices = {
   {0,0,0},
   {1,0,0},
   {1,1,0},
@@ -15,7 +15,7 @@ std::vector<Vec3<float>> MCClassification::vertices = {
   {0,1,1}
 };
 
-std::vector<std::pair<size_t, size_t>> MCClassification::edges = {
+const std::vector<std::pair<size_t, size_t>> MCClassification::edges = {
   {0, 1},
   {1, 2},
   {2, 3},
@@ -30,7 +30,7 @@ std::vector<std::pair<size_t, size_t>> MCClassification::edges = {
   {3, 7}
 };
 
-std::vector<std::vector<Greet::Vec3<size_t>>> MCClassification::classifications = {
+const std::vector<std::vector<Greet::Vec3<size_t>>> MCClassification::classifications = {
   {},
   {{8, 0, 3}},
   {{1, 0, 9}},

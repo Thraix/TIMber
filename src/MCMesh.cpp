@@ -14,18 +14,25 @@ MCMesh::MCMesh(const std::vector<MCPointData>& data, uint width, uint height, ui
   voxelData{data}, width{width}, height{height}, length{length}
 {
   // Go through all the cubes
+  Vec3<size_t> voxel = {0, 0, 0};
   for(uint z = 0;z<length-1;z++)
   {
+    voxel.z = z;
     for(uint y = 0;y<height-1;y++)
     {
+      voxel.y = y;
       for(uint x = 0;x<width-1;x++)
       {
-        std::vector<Greet::Vec3<Greet::Vec3<float>>> faces = MCClassification::GetMarchingCubeFaces(data, x, y, z, width, height, length);
-        std::vector<uint> listFaces;
+        voxel.x = x;
+        std::vector<Greet::Vec3<size_t>> faces = MCClassification::GetMarchingCubeFaces(data, x, y, z, width, height, length);
+        std::vector<std::pair<size_t, Vec3<size_t>>> listFaces;
         for(auto&& face : faces)
         {
-          uint pos = AddFace(face);
-          listFaces.push_back(pos);
+          size_t v1 = AddVertex(face[0], voxel);
+          size_t v2 = AddVertex(face[1], voxel);
+          size_t v3 = AddVertex(face[2], voxel);
+          uint pos = AddFace({v1, v2, v3}, voxel);
+          listFaces.push_back(std::make_pair(pos, face));
         }
         voxelFaces.emplace(x + (y + z * (height - 1)) * (width - 1), listFaces);
       }
@@ -60,40 +67,69 @@ void MCMesh::UpdateData(const std::vector<MCPointData>& data, int xOffset, int y
   uint maxX = std::min(xOffset+w+1, width-1);
   uint maxY = std::min(yOffset+h+1, height-1);
   uint maxZ = std::min(zOffset+l+1, length-1);
+  Vec3<size_t> voxel = {0, 0, 0};
   for(uint z = minZ;z<maxZ;z++)
   {
+    voxel.z = z;
     for(uint y = minY;y<maxY;y++)
     {
+      voxel.y = y;
       for(uint x = minX;x<maxX;x++)
       {
-        std::vector<Greet::Vec3<Greet::Vec3<float>>> newFaces = MCClassification::GetMarchingCubeFaces(data, x, y, z, width, height, length);
+        voxel.x = x;
+        std::vector<Greet::Vec3<size_t>> newFaces = MCClassification::GetMarchingCubeFaces(data, x, y, z, width, height, length);
 
         uint index = x + (y + z * (height - 1)) * (width - 1);
         uint indexVoxel = x + (y + z * height) * width;
         auto&& it = voxelFaces.find(index);
-        std::vector<uint> listFaces;
+        std::vector<std::pair<size_t, Vec3<size_t>>> listFaces;
         if(it != voxelFaces.end())
         {
           listFaces = it->second;
+        }
+        ushort oldEdges = GetVoxelEdges(listFaces);
+        ushort newEdges = GetVoxelEdges(newFaces);
+
+        std::vector<size_t> edgeVertex(12);
+        // Go through all the edges (a cube has 12 edges)
+        for(int i = 0;i<12;i++)
+        {
+          // If we had an edge but it is now gone
+          if((oldEdges & 0x1) && !(newEdges & 0x1))
+          {
+            RemoveVertex(i, voxel);
+          }
+          // If we didn't have an edge but now we do
+          else if(!(oldEdges & 0x1) && (newEdges & 0x1))
+          {
+            edgeVertex[i] = AddVertex(i, voxel);
+          }
+          else if(oldEdges & 0x1)
+          {
+            edgeVertex[i] = UpdateVertex(i, voxel);
+          }
+
+          oldEdges >>= 1;
+          newEdges >>= 1;
         }
 
         for(int i = 0;i < newFaces.size();i++)
         {
           if(i < listFaces.size())
           {
-            faces[listFaces[i]].v1 = AddVertex((newFaces[i])[0]);
-            faces[listFaces[i]].v2 = AddVertex((newFaces[i])[1]);
-            faces[listFaces[i]].v3 = AddVertex((newFaces[i])[2]);
+            faces[listFaces[i].first].v1 = edgeVertex[newFaces[i][0]];
+            faces[listFaces[i].first].v2 = edgeVertex[newFaces[i][1]];
+            faces[listFaces[i].first].v3 = edgeVertex[newFaces[i][2]];
           }
           else
           {
-            uint pos = AddFace(newFaces[i]);
-            listFaces.push_back(pos);
+            uint pos = AddFace({edgeVertex[newFaces[i][0]],edgeVertex[newFaces[i][1]],edgeVertex[newFaces[i][2]]}, voxel);
+            listFaces.push_back(std::make_pair(pos, newFaces[i]));
           }
         }
         while(listFaces.size() > newFaces.size())
         {
-          RemoveFace(listFaces[listFaces.size() - 1]);
+          RemoveFace(listFaces[listFaces.size() - 1].first);
           listFaces.pop_back();
         }
         if(it != voxelFaces.end())
@@ -149,14 +185,10 @@ void MCMesh::UpdateBuffer(Buffer& buffer, void* data, size_t size)
   buffer.Disable();
 }
 
-uint MCMesh::AddFace(const Vec3<Vec3<float>>& verts)
+uint MCMesh::AddFace(const Vec3<size_t>& vertices, const Greet::Vec3<size_t>& voxel)
 {
-  uint v1 = AddVertex(verts[0]);
-  uint v2 = AddVertex(verts[1]);
-  uint v3 = AddVertex(verts[2]);
-
   uint pos = faces.size();
-  Face face{v1,v2,v3};
+  Face face(vertices[0],vertices[1],vertices[2]);
 #if 0
   if(false && !fragmentFaces.empty())
   {
@@ -174,18 +206,18 @@ uint MCMesh::AddFace(const Vec3<Vec3<float>>& verts)
   return pos;
 }
 
-const Vec4& MCMesh::GetColor(const Vec3<float>& vertex)
+const Vec4& MCMesh::GetColor(size_t edge, const Vec3<size_t>& voxel)
 {
-  const Vec3<uint> vMin{floor(vertex.x), floor(vertex.y), floor(vertex.z)};
-  const Vec3<uint> vMax{ceil(vertex.x), ceil(vertex.y), ceil(vertex.z)};
-  uint indexMin = vMin.x + (vMin.y + vMin.z * height) * width;
+  Vec3<float> vMin = MCClassification::vertices[MCClassification::edges[edge].first];
+  Vec3<float> vMax = MCClassification::vertices[MCClassification::edges[edge].second];
+  uint indexMin = (vMin.x + voxel.x) + ((vMin.y + voxel.y) + (vMin.z + voxel.z) * height) * width;
   if(voxelData[indexMin].inhabited)
   {
     return voxelData[indexMin].voxel.color;
   }
   else
   {
-    uint indexMax = vMax.x + (vMax.y + vMax.z * height) * width;
+    uint indexMax = (vMax.x + voxel.x) + ((vMax.y + voxel.y) + (vMax.z + voxel.z) * height) * width;
     return voxelData[indexMax].voxel.color;
   }
 }
@@ -200,15 +232,14 @@ void MCMesh::RemoveFace(uint face)
   faces[face].v3 = 0;
 }
 
-uint MCMesh::AddVertex(const Vec3<float>& vertex) 
+uint MCMesh::AddVertex(size_t edge, const Greet::Vec3<size_t>& voxel)
 {
-  auto&& it = uniqueVertices.find(vertex);
+  auto&& it = uniqueVertices.find(GetEdgeIndex(edge, voxel));
 
   if(it != uniqueVertices.end())
   {
-    colors[it->second.first] = GetColor(vertex);
-    it->second.second++;
-    return it->second.first;
+    colors[it->second] = GetColor(edge, voxel);
+    return it->second;
   }
 
   uint pos = vertices.size();
@@ -226,10 +257,92 @@ uint MCMesh::AddVertex(const Vec3<float>& vertex)
   else
 #endif
   {
-    vertices.push_back(vertex);
-    colors.push_back(GetColor(vertex));
+    vertices.push_back(GetVertex(edge, voxel));
+    colors.push_back(GetColor(edge, voxel));
   }
-  uniqueVertices.emplace(vertex, std::make_pair(pos, 1));
+  uniqueVertices.emplace(GetEdgeIndex(edge, voxel), pos);
   return pos;
+}
+
+void MCMesh::RemoveVertex(size_t edge, const Vec3<size_t>& voxel)
+{
+  auto&& it = uniqueVertices.find(GetEdgeIndex(edge, voxel));
+  if(it != uniqueVertices.end())
+  {
+    size_t index = it->second;
+    fragmentVertices.push({index, 1});
+  }
+}
+
+uint MCMesh::UpdateVertex(size_t edge, const Vec3<size_t>& voxel)
+{
+  auto&& it = uniqueVertices.find(GetEdgeIndex(edge, voxel));
+  if(it != uniqueVertices.end())
+  {
+    size_t index = it->second;
+    vertices[index] = GetVertex(edge, voxel);
+    return index;
+  }
+  Log::Error("Tried updating non existing vertex!");
+  return 0;
+}
+
+uint MCMesh::GetEdgeIndex(size_t mcEdgeIndex, const Vec3<size_t>& voxel)
+{
+  const Vec3<float>& v1 = MCClassification::vertices[MCClassification::edges[mcEdgeIndex].first];
+  const Vec3<float>& v2 = MCClassification::vertices[MCClassification::edges[mcEdgeIndex].second];
+  if(v1.x != v2.x)
+  {
+    // Edge along voxel.x avoxel.xis
+    int edgeX = voxel.x;
+    int edgeY = voxel.y + (int)v1.y;
+    int edgeZ = voxel.z + (int)v1.z;
+    return edgeX + (edgeY + edgeZ * height) * width;
+  }
+  else if(v1.y != v2.y)
+  {
+    // Edge along voxel.y avoxel.xis
+    int edgeX = voxel.x + (int)v1.x;
+    int edgeY = voxel.y;
+    int edgeZ = voxel.z + (int)v1.z;
+    return edgeX + (edgeY + edgeZ * height) * width + width * height * length;
+  }
+  else //if(v1.voxel.z != v2.voxel.z)
+  {
+    // Edge along voxel.z avoxel.xis
+    int edgeX = voxel.x + (int)v1.x;
+    int edgeY = voxel.y + (int)v1.y;
+    int edgeZ = voxel.z;
+    return edgeX + (edgeY + edgeZ * height) * width + 2 * width * height * length;
+  }
+}
+
+ushort MCMesh::GetVoxelEdges(std::vector<Vec3<size_t>> faces)
+{
+  ushort edges = 0;
+  for(auto&& face : faces)
+  {
+    edges |= (1 << face[0]);
+    edges |= (1 << face[1]);
+    edges |= (1 << face[2]);
+  }
+  return edges;
+}
+
+ushort MCMesh::GetVoxelEdges(std::vector<std::pair<size_t, Vec3<size_t>>> faces)
+{
+  ushort edges = 0;
+  for(auto&& face : faces)
+  {
+    edges |= (1 << face.second[0]);
+    edges |= (1 << face.second[1]);
+    edges |= (1 << face.second[2]);
+  }
+  return edges;
+}
+
+Vec3<float> MCMesh::GetVertex(size_t mcEdgeIndex, const Vec3<size_t>& voxel)
+{
+  return MCClassification::GetEdgeMidPoint(mcEdgeIndex, voxelData, voxel.x, voxel.y, voxel.z, width, height, length) + Vec3<float>(voxel.x, voxel.y, voxel.z);
 }
 
