@@ -67,8 +67,8 @@ class Voxel
     static const Voxel none;
     static const Voxel grass;
     static const Voxel stone;
-    static const Voxel copper;
-    static const Voxel tin;
+    static const Voxel royalium;
+    static const Voxel malachite;
     static const Voxel snow;
     static const Voxel wood;
     static const Voxel leaves;

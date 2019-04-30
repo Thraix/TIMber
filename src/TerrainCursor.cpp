@@ -21,6 +21,7 @@ TerrainCursor::~TerrainCursor()
 
 void TerrainCursor::Render(const Camera& camera, const IntersectionData& intersection) const
 {
+  return;
   Mat4 screenToWorld = ~(camera.GetProjectionMatrix() * camera.GetViewMatrix());
 
   Vec4 nearRes = screenToWorld * Vec3<float>(0.0f, 0.0f, -1.0);

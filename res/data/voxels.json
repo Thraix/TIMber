@@ -13,15 +13,15 @@
     "name": "Stone",
     "color": "#888888"
   },
-  "copper": {
+  "royalium": {
     "id": 3,
-    "name": "Copper Ore",
-    "color": "#f47631"
+    "name": "Royalium Ore",
+    "color": "#9f17ff"
   },
-  "tin": {
+  "malachite": {
     "id": 4,
-    "name": "Tin Ore",
-    "color": "#eaeaea"
+    "name": "Malachite Ore",
+    "color": "#17ff84"
   },
   "snow": {
     "id": 5,
