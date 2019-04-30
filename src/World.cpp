@@ -5,7 +5,7 @@
 using namespace Greet;
 
 World::World(uint width, uint length)
-  : player{this, {0,0,0}},//width * Chunk::CHUNK_WIDTH / 2.0f, 0.0f, length * Chunk::CHUNK_LENGTH/ 2.0f}},
+  : player{this, {width * Chunk::CHUNK_WIDTH / 2.0f, Chunk::CHUNK_HEIGHT, length * Chunk::CHUNK_LENGTH/ 2.0f}},
   skybox{Greet::TextureManager::Get3D("skybox")},
   width{width}, length{length}, terrainMaterial{Greet::Shader::FromFile("res/shaders/terrain.shader")}, noiseTexture{TextureManager::Get2D("noiseMap")}
 {

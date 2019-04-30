@@ -166,9 +166,9 @@ void Player::OnEvent(Event& event)
   {
     MousePressEvent& e = (MousePressEvent&)event;
     if(e.GetButton() == GLFW_MOUSE_BUTTON_1)
-      world->PlaceVoxels();
-    if(e.GetButton() == GLFW_MOUSE_BUTTON_2)
       world->RemoveVoxels();
+    if(e.GetButton() == GLFW_MOUSE_BUTTON_2)
+      world->PlaceVoxels();
   }
 }
 
