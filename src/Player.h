@@ -2,7 +2,7 @@
 
 #include <graphics/models/TPCamera.h>
 #include <graphics/renderers/BatchRenderer3D.h>
-#include "HalfEdgeMesh.h"
+#include "PlayerCamera.h"
 
 class World;
 
@@ -33,12 +33,12 @@ class Player
     Greet::Mesh* mesh;
     Greet::Material material;
     Greet::EntityModel* model;
+
     PlayerModel()
       : material{Greet::Shader::FromFile("res/shaders/3dshader.shader")}
     {
       Greet::MeshData* data = Greet::MeshFactory::Cube(0,0.2f,0,0.2f,0.4f,0.2f);
-      HalfEdgeMesh* halfEdgeMesh = new HalfEdgeMesh{data};
-      mesh = new Greet::Mesh(halfEdgeMesh->vertexArray.data(), halfEdgeMesh->vertexArray.size(), halfEdgeMesh->indices.data(), halfEdgeMesh->indices.size());
+      mesh = new Greet::Mesh(data);
       model = new Greet::EntityModel(mesh, &material);
       delete data;
     }
@@ -51,7 +51,7 @@ class Player
   };
 
   private:
-    Greet::TPCamera camera;
+    PlayerCamera camera;
     Greet::Vec3<float> position;
     PlayerMovement playerMovement;
     PlayerControl playerControl;
@@ -60,7 +60,7 @@ class Player
 
   private:
     // Since this initialization takes up a lot of space the code looks cleaner with this
-    static Greet::TPCamera CreateCamera();
+    static PlayerCamera CreateCamera();
 
   public:
 
@@ -70,7 +70,7 @@ class Player
     void Update(float timeElapsed);
     void OnEvent(Greet::Event& event);
 
-    const Greet::TPCamera& GetCamera() const;
+    const PlayerCamera& GetCamera() const;
     const Greet::Vec3<float>& GetPosition() const { return position; }
     const float GetReach() const { return 8; };
 

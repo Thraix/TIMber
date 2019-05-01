@@ -1,7 +1,11 @@
 #include <Greet.h>
 
 #include "World.h"
+#include "TestWorld.h"
 #include "LineRenderer.h"
+
+#undef TESTING
+//#define TESTING
 
 using namespace Greet;
 class CrossHairLayer : public Layer
@@ -30,7 +34,11 @@ class Game : public App
 {
   private:
 
+#ifndef TESTING
     World* world;
+#else
+    TestWorld* world;
+#endif
     Layer3D* lineLayer;
     CrossHairLayer* layer;
     Renderable2D* crossHair;
@@ -62,7 +70,11 @@ class Game : public App
       layer = new CrossHairLayer(crossHair);
       // layer->Add(noiseRenderable);
 
+#ifndef TESTING
       world = new World(2, 2);
+#else
+      world = new TestWorld();
+#endif
       RenderEngine::Add3DScene(world, "3dscene");
       RenderEngine::Add2DScene(layer, "crosshair");
     }

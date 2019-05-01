@@ -5,6 +5,7 @@
 #include <utils/Noise.h>
 #include "MCMesh.h"
 #include "RayCast.h"
+#include "PlayerCamera.h"
 
 class Chunk
 {
@@ -30,7 +31,7 @@ class Chunk
     void Update(float timeElapsed);
 
     Greet::Mat4 GetTransformationMatrix() const { return Greet::Mat4::Translate({posX * CHUNK_WIDTH, 0 , posZ * CHUNK_LENGTH});}
-    IntersectionData RayCastChunk(const Greet::TPCamera& camera);
+    IntersectionData RayCastChunk(const Greet::Camera& camera);
 
     void SphereOperation(const Greet::Vec3<float>& point, float radius, std::function<void(MCPointData&, int, int,int, float distanceSQ, bool inside)> func);
     void PlaceVoxels(const Greet::Vec3<float>& point, float radius);

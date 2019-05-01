@@ -5,10 +5,10 @@
 
 using namespace Greet;
 
-TPCamera Player::CreateCamera()
+PlayerCamera Player::CreateCamera()
 {
   float distance = 0.0f;
-  return TPCamera(Greet::Mat4::ProjectionMatrix(Window::GetAspect(), 90.0, 0.01, 1000.0), Greet::Vec3<float>(), distance, 0.4, 0, distance, distance,-1.0,1.0);
+  return PlayerCamera(Greet::Mat4::ProjectionMatrix(Window::GetAspect(), 90.0, 0.01, 1000.0), Greet::Vec3<float>(), 0.0f, 0.0f);
 }
 
 Player::Player(World* world, const Greet::Vec3<float>& position)
@@ -49,7 +49,7 @@ void Player::Update(float timeElapsed)
   if(playerControl.backward) playerMovement.velocity.z = 1;
 
   Vec2 movement{playerMovement.velocity.x, playerMovement.velocity.z};
-  movement.Rotate(camera.GetRotation() + 90);
+  movement.Rotate(camera.GetYaw());
   playerMovement.velocity = {movement.x, playerMovement.velocity.y, movement.y};
   position += playerMovement.velocity * timeElapsed * 10;
 
@@ -73,7 +73,7 @@ void Player::Move(float timeElapsed)
   if(playerControl.right) acc.x += 1;
   if(acc.LengthSQ() > 0.0f)
   {
-    acc.Rotate(camera.GetRotation() + 90).Normalize();
+    acc.Rotate(camera.GetYaw()).Normalize();
     acc *= accel;
   }
   Vec3<float> acceleration = Vec3(acc.x, 0.0f, acc.y);
@@ -159,8 +159,7 @@ void Player::OnEvent(Event& event)
   }
   else if(EVENT_IS_TYPE(event, EventType::MOUSE_MOVE))
   {
-    MouseMoveEvent& e = (MouseMoveEvent&)event;
-    camera.Rotate(e.GetDeltaPosition()*0.2);
+    camera.OnEvent(event);
   }
   else if(EVENT_IS_TYPE(event, EventType::MOUSE_PRESS))
   {
@@ -172,7 +171,7 @@ void Player::OnEvent(Event& event)
   }
 }
 
-const TPCamera& Player::GetCamera() const
+const PlayerCamera& Player::GetCamera() const
 {
   return camera;
 }

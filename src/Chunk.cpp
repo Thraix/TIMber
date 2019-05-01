@@ -241,7 +241,7 @@ void Chunk::SphereOperation(const Vec3<float>& point, float radius, std::functio
   }
 }
 
-IntersectionData Chunk::RayCastChunk(const TPCamera& camera)
+IntersectionData Chunk::RayCastChunk(const Camera& camera)
 {
   Mat4 screenToModel = ~(camera.GetProjectionMatrix() * camera.GetViewMatrix() * GetTransformationMatrix());
 

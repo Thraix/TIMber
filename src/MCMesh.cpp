@@ -120,6 +120,7 @@ void MCMesh::UpdateData(const std::vector<MCPointData>& data, int xOffset, int y
             faces[listFaces[i].first].v1 = edgeVertex[newFaces[i][0]];
             faces[listFaces[i].first].v2 = edgeVertex[newFaces[i][1]];
             faces[listFaces[i].first].v3 = edgeVertex[newFaces[i][2]];
+            listFaces[i].second = newFaces[i];
           }
           else
           {
@@ -141,6 +142,10 @@ void MCMesh::UpdateData(const std::vector<MCPointData>& data, int xOffset, int y
   }
 
   UpdateRenderData();
+#if 0
+  Log::Info("Vertex Count: ", vertices.size());
+  Log::Info("Face Count: ", faces.size());
+#endif
 }
 
 void MCMesh::Bind()
@@ -189,8 +194,7 @@ uint MCMesh::AddFace(const Vec3<size_t>& vertices, const Greet::Vec3<size_t>& vo
 {
   uint pos = faces.size();
   Face face(vertices[0],vertices[1],vertices[2]);
-#if 0
-  if(false && !fragmentFaces.empty())
+  if(!fragmentFaces.empty())
   {
     Fragmentation& fragment = fragmentFaces.front();
     pos = fragment.position;
@@ -201,7 +205,6 @@ uint MCMesh::AddFace(const Vec3<size_t>& vertices, const Greet::Vec3<size_t>& vo
       fragmentFaces.pop();
   }
   else
-#endif
     faces.push_back(face);
   return pos;
 }
@@ -234,7 +237,8 @@ void MCMesh::RemoveFace(uint face)
 
 uint MCMesh::AddVertex(size_t edge, const Greet::Vec3<size_t>& voxel)
 {
-  auto&& it = uniqueVertices.find(GetEdgeIndex(edge, voxel));
+  uint edgeIndex = GetEdgeIndex(edge, voxel);
+  auto&& it = uniqueVertices.find(edgeIndex);
 
   if(it != uniqueVertices.end())
   {
@@ -243,24 +247,23 @@ uint MCMesh::AddVertex(size_t edge, const Greet::Vec3<size_t>& voxel)
   }
 
   uint pos = vertices.size();
-#if 0
   if(!fragmentVertices.empty())
   {
     Fragmentation& fragment = fragmentVertices.front();
     pos = fragment.position;
-    vertices[pos] = vertex;
+    vertices[pos] = GetVertex(edge, voxel);
+    colors[pos] = GetColor(edge, voxel);
     fragment.position++;
     fragment.size--;
     if(fragment.size == 0)
       fragmentVertices.pop();
   }
   else
-#endif
   {
     vertices.push_back(GetVertex(edge, voxel));
     colors.push_back(GetColor(edge, voxel));
   }
-  uniqueVertices.emplace(GetEdgeIndex(edge, voxel), pos);
+  uniqueVertices.emplace(edgeIndex, pos);
   return pos;
 }
 
@@ -271,6 +274,7 @@ void MCMesh::RemoveVertex(size_t edge, const Vec3<size_t>& voxel)
   {
     size_t index = it->second;
     fragmentVertices.push({index, 1});
+    uniqueVertices.erase(it);
   }
 }
 
@@ -281,6 +285,7 @@ uint MCMesh::UpdateVertex(size_t edge, const Vec3<size_t>& voxel)
   {
     size_t index = it->second;
     vertices[index] = GetVertex(edge, voxel);
+    colors[index] = GetColor(edge, voxel);
     return index;
   }
   Log::Error("Tried updating non existing vertex!");
