@@ -7,11 +7,13 @@
 #include <graphics/models/Material.h>
 #include <graphics/textures/TextureManager.h>
 #include <graphics/Skybox.h>
+#include <graphics/models/MeshFactory.h>
 
+#include "physics/PhysicsEngine.h"
+#include "MCMesh.h"
 #include "MCPointData.h"
 #include "LineRenderer.h"
 #include "PlayerCamera.h"
-#include "MCMesh.h"
 
 class TestWorld : public Greet::Scene
 {
@@ -23,17 +25,44 @@ class TestWorld : public Greet::Scene
     Greet::Material material;
     PlayerCamera camera;
     bool mouseGrab = true;
+    PhysicsEngine engine;
+
+    PhysicsPlaneBody plane;
+    PhysicsPlaneBody plane2;
+    PhysicsPlaneBody plane3;
+    PhysicsSphereBody sphere;
+    PhysicsSphereBody sphere2;
+    PhysicsSphereBody sphere3;
+
   public:
     TestWorld()
       : skybox{Greet::TextureManager::Get3D("skybox")}, 
       material{Greet::Shader::FromFile("res/shaders/terrain.shader")},
-      camera{Greet::Mat4::ProjectionMatrix(Greet::Window::GetAspect(), 90, 0.001f, 100.0f),{0.0f}, 0.0f,0.0f}
+      camera{Greet::Mat4::ProjectionMatrix(Greet::Window::GetAspect(), 90, 0.001f, 100.0f),{0.0f}, 0.0f,0.0f},
+      plane{{0.0f, -0.0f, 0.0f}, {2.0f, 1.0f, 0.0f}}, 
+      plane2{{0.0f, -10.0f, 0.0f}, {0.0f, 1.0f, 0.0f}}, 
+      plane3{{25.0f, -10.0f, 0.0f}, {-2.0f, 1.0f, 0.0f}}, 
+      sphere{{1.0f, 10.0f, 0.0f}, 1.0f, 1.0f},
+      sphere2{{0.0f, 15.0f, 0.0f},8.0f, 2.0f},
+      sphere3{{0.2f, 19.0f, 0.0f},1.0f, 1.0f}
     {
       data = std::vector<MCPointData>(size * size * size);
       SetDataPoint({true}, 1,1,1);
       SetDataPoint({true}, 2,1,1);
       mesh = new MCMesh(data, size, size, size);
       Greet::Window::GrabMouse(true);
+
+      engine.AddPhysicsBody(&plane);
+      engine.AddPhysicsBody(&plane2);
+      engine.AddPhysicsBody(&plane3);
+      engine.AddPhysicsBody(&sphere);
+      engine.AddPhysicsBody(&sphere2);
+      engine.AddPhysicsBody(&sphere3);
+
+      // Apply gravity to sphere
+      sphere.ApplyForceAsAcceleration({0, -9.82, 0});
+      sphere2.ApplyForceAsAcceleration({0, -9.82, 0});
+      sphere3.ApplyForceAsAcceleration({0, -9.82, 0});
     }
 
     virtual ~TestWorld()
@@ -44,6 +73,7 @@ class TestWorld : public Greet::Scene
     void Update(float timeElapsed) override
     {
       camera.Update(timeElapsed);
+      engine.Update(timeElapsed);
     }
 
     void Render() const override
@@ -80,6 +110,10 @@ class TestWorld : public Greet::Scene
       mesh->Render();
       mesh->Unbind();
       material.Unbind();
+
+#ifdef RENDER_PHYSICS
+      engine.Render(camera);
+#endif
     }
 
     void OnEvent(Greet::Event& event) override
