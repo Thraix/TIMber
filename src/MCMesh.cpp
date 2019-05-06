@@ -214,7 +214,7 @@ const Vec4& MCMesh::GetColor(size_t edge, const Vec3<size_t>& voxel)
   Vec3<float> vMin = MCClassification::vertices[MCClassification::edges[edge].first];
   Vec3<float> vMax = MCClassification::vertices[MCClassification::edges[edge].second];
   uint indexMin = (vMin.x + voxel.x) + ((vMin.y + voxel.y) + (vMin.z + voxel.z) * height) * width;
-  if(voxelData[indexMin].inhabited)
+  if(voxelData[indexMin].magnitude >= 0.0f)
   {
     return voxelData[indexMin].voxel.color;
   }

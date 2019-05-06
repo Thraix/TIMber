@@ -12,7 +12,7 @@ PhysicsEngine::PhysicsEngine()
   sphereMesh = new Mesh(data);
   sphereMesh->SetEnableCulling(false);
   delete data;
-  data = Greet::MeshFactory::Quad(0.0f,0.0f,0.0f,50.0f,10.0f);
+  data = Greet::MeshFactory::Quad(0.0f,0.0f,0.0f,60.0f,60.0f);
   planeMesh = new Mesh(data);
   planeMesh->SetEnableCulling(false);
   delete data;
@@ -159,7 +159,7 @@ void PhysicsEngine::Render(const Camera& camera) const
     else if(body->GetType() == CollisionType::Plane)
     {
       PhysicsPlaneBody* plane = (PhysicsPlaneBody*)body;
-      material.GetShader().SetUniformMat4("transformationMatrix", Mat4::Translate(body->GetPosition()) * Mat4::RotateRZ(-atan2(plane->GetNormal().x, plane->GetNormal().y)));
+      material.GetShader().SetUniformMat4("transformationMatrix", Mat4::Translate(body->GetPosition()) * Mat4::RotateRX(atan2(plane->GetNormal().z, plane->GetNormal().y)) * Mat4::RotateRZ(-atan2(plane->GetNormal().x, plane->GetNormal().y)));
       planeMesh->Bind();
       planeMesh->Render();
       planeMesh->Unbind();

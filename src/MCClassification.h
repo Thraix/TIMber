@@ -21,13 +21,18 @@ class MCClassification
       MCPointData d2 = data[(x + v2.x) + ((y + v2.y) + (z + v2.z) * height) * width];
 
       float t = 0.5;
-      if(d1.inhabited)
+      if(d1.magnitude < 0.0f)
       {
-        t = 1.0f - d1.magnitude;
+        // d1.magnitude is negative we want abs total
+        float total = d2.magnitude - d1.magnitude;
+        float offset = d2.magnitude / total;
+        t = offset;
       }
       else
       {
-        t = d2.magnitude;
+        float total = d1.magnitude - d2.magnitude;
+        float offset = d1.magnitude / total;
+        t = 1.0f - offset;
       }
       return t * v1 + (1 - t) * v2;
     }
@@ -39,7 +44,7 @@ class MCClassification
       {
         classification >>= 1;
         const MCPointData& point = data[(x + (size_t)vertex.x) + (y + (size_t)vertex.y) * width  + (z + (size_t)vertex.z) * width * height];
-        if(!point.inhabited)
+        if(point.magnitude < 0)
           classification |= 0x80; // 0b1000000
       }
       std::vector<Greet::Vec3<size_t>> faces = classifications[classification];

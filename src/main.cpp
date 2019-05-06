@@ -4,8 +4,7 @@
 #include "TestWorld.h"
 #include "LineRenderer.h"
 
-//#undef TESTING
-#define TESTING
+//#define TESTING
 
 using namespace Greet;
 class CrossHairLayer : public Layer

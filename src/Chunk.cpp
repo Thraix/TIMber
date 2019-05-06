@@ -19,7 +19,7 @@ void Chunk::Initialize(uint posX, uint posZ)
 {
   this->posX = posX;
   this->posZ = posZ;
-  heightMap = Noise::GenNoise(CHUNK_WIDTH+1, CHUNK_LENGTH+1,4,128, 128,0.75f, posX * CHUNK_WIDTH, posZ * CHUNK_LENGTH);
+  heightMap = Noise::GenNoise(CHUNK_WIDTH+1, CHUNK_LENGTH+1,4,32, 32,0.75f, posX * CHUNK_WIDTH, posZ * CHUNK_LENGTH);
   biome = Noise::GenNoise(CHUNK_WIDTH+1, CHUNK_LENGTH+1,4,128, 128,0.5f, (posX+14) * CHUNK_WIDTH, (posZ+12) * CHUNK_LENGTH);
   std::vector<float> caves = Noise::GenNoise(CHUNK_WIDTH+1,CHUNK_HEIGHT+1, CHUNK_LENGTH+1,4,32,32, 32,0.75f, posX * CHUNK_WIDTH, 0, posZ * CHUNK_LENGTH);
 
@@ -47,13 +47,16 @@ void Chunk::Initialize(uint posX, uint posZ)
       {
         int index = x + (y + z * (CHUNK_HEIGHT+1)) * (CHUNK_WIDTH+1);
         int indexHeight = x + z * (CHUNK_WIDTH+1);
-        voxelData[index].inhabited = heightMap[indexHeight] * (CHUNK_HEIGHT+1) > y && (caves[index] < 0.48 || caves[index] > 0.52);
-        if(heightMap[indexHeight] * (CHUNK_HEIGHT+1) < y + 1 && voxelData[index].inhabited)
+        float height = heightMap[indexHeight] * (CHUNK_HEIGHT+1);
+        voxelData[index].magnitude = height - y;// && (caves[index] < 0.48 || caves[index] > 0.52);
+        /*
+        if(voxelData[index].magnitude >= 0.0f)
         {
-          voxelData[index].magnitude = heightMap[indexHeight] * (CHUNK_HEIGHT+1) - y;
+          voxelData[index].magnitude = std::min(caves[index] - 0.50f, voxelData[index].magnitude);
         }
-        else
-          voxelData[index].magnitude = 0.5f;
+        */
+
+        //voxelData[index].magnitude = (caves[index] - 0.48);
 
         voxelData[index].voxel = Voxel::stone;
 
@@ -61,7 +64,6 @@ void Chunk::Initialize(uint posX, uint posZ)
         if(minerals[index] < min) min = minerals[index];
         if(minerals[index] > max) max = minerals[index];
         //voxelData[index].magnitude = (minerals[index] - 0.20f) / 0.80f;
-        Math::Clamp(&(voxelData[index].magnitude), 0.01f, 0.99f);
         if(minerals[index] > 0.60)
           voxelData[index].voxel = Voxel::royalium;
         if(minerals[index] < 0.40)
@@ -73,7 +75,7 @@ void Chunk::Initialize(uint posX, uint posZ)
       }
     }
   }
-  AddTree(4, heightMap[4 + 4 * (CHUNK_WIDTH+1)] * (CHUNK_HEIGHT+1),4);
+  //AddTree(4, heightMap[4 + 4 * (CHUNK_WIDTH+1)] * (CHUNK_HEIGHT+1),4);
   for(int z = 0;z<CHUNK_LENGTH+1;z++)
   {
     for(int x = 0;x<CHUNK_WIDTH+1;x++)
@@ -83,7 +85,7 @@ void Chunk::Initialize(uint posX, uint posZ)
         for(int y = CHUNK_HEIGHT;y>=0;y--)
         {
           int index = x + y * (CHUNK_WIDTH+1) + z * (CHUNK_WIDTH+1) * (CHUNK_HEIGHT+1);
-          if(voxelData[index].inhabited)
+          if(voxelData[index].magnitude >= 0.0f)
           {
             voxelData[index].voxel = Voxel::snow;
             break;
@@ -104,7 +106,7 @@ void Chunk::AddTree(uint x, uint y, uint z)
   for(int i = y; i < y + 5; i++)
   {
     uint index = x + i * (CHUNK_WIDTH+1) + z * (CHUNK_WIDTH+1) * (CHUNK_HEIGHT+1);
-    voxelData[index].inhabited = true;
+    voxelData[index].magnitude = 0.0f;
     voxelData[index].voxel = Voxel::wood;
     //voxelData[index].magnitude = 0.5f;
   }
@@ -113,9 +115,8 @@ void Chunk::AddTree(uint x, uint y, uint z)
       {
       if(inside)
       {
-      if(!data.inhabited)
+      if(data.magnitude < 0.0f)
       {
-      data.inhabited = true;
       data.voxel = Voxel::leaves;
       data.magnitude = 3 - sqrtf(distanceSQ);
       Math::Clamp(&data.magnitude, 0.01f, 0.99f);
@@ -142,11 +143,6 @@ void Chunk::PlaceVoxels(const Vec3<float>& point, float radius)
   // Vim doesn't like this formatting...
   SphereOperation(point, radius, [&] (MCPointData& data, int voxelX, int voxelY, int voxelZ, float distanceSQ, bool inside) 
       {
-      if(inside)
-      {
-      if(!data.inhabited)
-      {
-      data.inhabited = true;
       dirty = true;
       if(voxelX < minX) minX = voxelX;
       if(voxelY < minY) minY = voxelY;
@@ -154,11 +150,7 @@ void Chunk::PlaceVoxels(const Vec3<float>& point, float radius)
       if(voxelX > maxX) maxX = voxelX;
       if(voxelY > maxY) maxY = voxelY;
       if(voxelZ > maxZ) maxZ = voxelZ;
-
-      data.magnitude = radius - sqrtf(distanceSQ);
-      Math::Clamp(&data.magnitude, 0.01f, 0.99f);
-      }
-      } 
+      data.magnitude = std::max(radius - sqrtf(distanceSQ), data.magnitude);
       });
 
   if(dirty)
@@ -177,36 +169,17 @@ void Chunk::RemoveVoxels(const Vec3<float>& point, float radius)
   uint minY = CHUNK_HEIGHT;
   uint minZ = CHUNK_LENGTH;
   // Vim doesn't like this formatting...
-  SphereOperation(point, radius, [&] (MCPointData& data, int x, int y, int z, float distanceSQ, bool inside) 
+  SphereOperation(point, radius, [&] (MCPointData& data, int voxelX, int voxelY, int voxelZ, float distanceSQ, bool inside) 
       {
-      bool changed = false;
-      if(inside)
-      {
-      if(data.inhabited)
-      {
-      changed = true;
-      data.inhabited = false;
-      }
-      } 
-      else
-      {
-      float distance = sqrtf(distanceSQ);
-      if(distance < (radius + 1))
-      {
-      data.magnitude = std::min(data.magnitude, 1.0f - (radius + 1 - distance));
-      changed = true;
-      }
-      }
-      if(changed)
-      {
-        dirty = true;
-        if(x < minX) minX = x;
-        if(y < minY) minY = y;
-        if(z < minZ) minZ = z;
-        if(x > maxX) maxX = x;
-        if(y > maxY) maxY = y;
-        if(z > maxZ) maxZ = z;
-      }
+      dirty = true;
+      if(voxelX < minX) minX = voxelX;
+      if(voxelY < minY) minY = voxelY;
+      if(voxelZ < minZ) minZ = voxelZ;
+      if(voxelX > maxX) maxX = voxelX;
+      if(voxelY > maxY) maxY = voxelY;
+      if(voxelZ > maxZ) maxZ = voxelZ;
+      data.magnitude = std::min(sqrtf(distanceSQ) - radius, data.magnitude);
+
       });
 
   if(dirty)
@@ -217,14 +190,14 @@ void Chunk::RemoveVoxels(const Vec3<float>& point, float radius)
 
 void Chunk::SphereOperation(const Vec3<float>& point, float radius, std::function<void(MCPointData&, int, int,int, float distanceSQ, bool inside)> func)
 {
-  int pX = (int)floor(point.x) - posX * CHUNK_WIDTH;
+  int pX = (int)floor(point.x) - posX * CHUNK_WIDTH - 1;
   int pY = (int)floor(point.y);
   int pZ = (int)floor(point.z) - posZ * CHUNK_LENGTH;
   Vec3<float> p = point - Vec3<float>{posX * CHUNK_WIDTH, 0, posZ * CHUNK_LENGTH};
 
   // Calculate the lower and upper bound for the for loops
-  Vec3<int> min = Vec::Max(Vec3<int>{pX, pY, pZ} - radius, Vec3(0));
-  Vec3<int> max = Vec::Min(Vec3<int>{pX, pY, pZ} + (radius + 1), Vec3<int>(CHUNK_WIDTH+1, CHUNK_HEIGHT+1, CHUNK_LENGTH+1));
+  Vec3<int> min = Vec::Max(Vec3<int>{pX, pY, pZ} - radius - 1, Vec3(0));
+  Vec3<int> max = Vec::Min(Vec3<int>{pX, pY, pZ} + (radius + 1)+1, Vec3<int>(CHUNK_WIDTH+1, CHUNK_HEIGHT+1, CHUNK_LENGTH+1));
 
   float radiusSQ = radius * radius;
   for(int z = min.z;z < max.z;z++)
@@ -284,7 +257,7 @@ void Chunk::Update(float timeElapsed)
         for(int y = CHUNK_HEIGHT;y>=0;y--)
         {
           int index = x + y * (CHUNK_WIDTH+1) + z * (CHUNK_WIDTH+1) * (CHUNK_HEIGHT+1);
-          if(voxelData[index].inhabited)
+          if(voxelData[index].magnitude >= 0.0f)
           {
             if(voxelData[index].voxel != Voxel::snow)
             {

@@ -6,8 +6,7 @@
 
 struct MCPointData
 {
-  bool inhabited = false;
   Voxel voxel = Voxel::grass;
-  float magnitude = 0.5f; // from 0 - 1 
+  float magnitude = -0.5f; // from 0 - 1 
 };
 

@@ -18,7 +18,7 @@
 class TestWorld : public Greet::Scene
 {
   private:
-    size_t size = 10;
+    size_t size = 11;
     std::vector<MCPointData> data;
     MCMesh* mesh;
     Greet::Skybox skybox;
@@ -30,6 +30,8 @@ class TestWorld : public Greet::Scene
     PhysicsPlaneBody plane;
     PhysicsPlaneBody plane2;
     PhysicsPlaneBody plane3;
+    PhysicsPlaneBody plane4;
+    PhysicsPlaneBody plane5;
     PhysicsSphereBody sphere;
     PhysicsSphereBody sphere2;
     PhysicsSphereBody sphere3;
@@ -38,26 +40,51 @@ class TestWorld : public Greet::Scene
     TestWorld()
       : skybox{Greet::TextureManager::Get3D("skybox")}, 
       material{Greet::Shader::FromFile("res/shaders/terrain.shader")},
-      camera{Greet::Mat4::ProjectionMatrix(Greet::Window::GetAspect(), 90, 0.001f, 100.0f),{0.0f}, 0.0f,0.0f},
+      camera{Greet::Mat4::ProjectionMatrix(Greet::Window::GetAspect(), 90, 0.001f, 100.0f),{0.0f, 0.0f, 10.0f}, 0.0f,0.0f},
       plane{{0.0f, -0.0f, 0.0f}, {2.0f, 1.0f, 0.0f}}, 
       plane2{{0.0f, -10.0f, 0.0f}, {0.0f, 1.0f, 0.0f}}, 
       plane3{{25.0f, -10.0f, 0.0f}, {-2.0f, 1.0f, 0.0f}}, 
+      plane4{{0.0f, 0.0f, 20.0f}, {0.0f, 0.0f,-1.0f}}, 
+      plane5{{0.0f, 0.0f, -20.0f}, {0.0f, 0.0f,1.0f}}, 
       sphere{{1.0f, 10.0f, 0.0f}, 1.0f, 1.0f},
       sphere2{{0.0f, 15.0f, 0.0f},8.0f, 2.0f},
       sphere3{{0.2f, 19.0f, 0.0f},1.0f, 1.0f}
     {
       data = std::vector<MCPointData>(size * size * size);
-      SetDataPoint({true}, 1,1,1);
-      SetDataPoint({true}, 2,1,1);
+      for(int z = 1;z<10;z++)
+      {
+        for(int x = 1;x<10;x++)
+        {
+          SetDataPoint({Voxel::grass, 0.5}, x,1,z);
+        }
+      }
+      for(int z = 4;z<7;z++)
+      {
+        for(int x = 4;x<7;x++)
+        {
+          SetDataPoint({Voxel::grass, 0.2}, x,2,z);  
+        }
+      }
+          SetDataPoint({Voxel::grass, 0.5}, 5,2,5);  
       mesh = new MCMesh(data, size, size, size);
       Greet::Window::GrabMouse(true);
 
       engine.AddPhysicsBody(&plane);
       engine.AddPhysicsBody(&plane2);
       engine.AddPhysicsBody(&plane3);
+      engine.AddPhysicsBody(&plane4);
+      engine.AddPhysicsBody(&plane5);
       engine.AddPhysicsBody(&sphere);
       engine.AddPhysicsBody(&sphere2);
       engine.AddPhysicsBody(&sphere3);
+      PhysicsSphereBody** bodies = new PhysicsSphereBody*[100];
+      for(int i = 0;i<100;i++)
+      {
+        bodies[i] = new PhysicsSphereBody({2 + (float)(i / 10) * 3, 0.0f, (float)(i % 10) * 3 - 10}, 1.0f, 1.0f);
+        engine.AddPhysicsBody(bodies[i]);
+        bodies[i]->ApplyForceAsAcceleration({0, -9.82,0});
+      }
+
 
       // Apply gravity to sphere
       sphere.ApplyForceAsAcceleration({0, -9.82, 0});
@@ -73,13 +100,13 @@ class TestWorld : public Greet::Scene
     void Update(float timeElapsed) override
     {
       camera.Update(timeElapsed);
-      engine.Update(timeElapsed);
+      //engine.Update(timeElapsed);
     }
 
     void Render() const override
     {
       skybox.Render(camera);
-#if 0
+#if 1
       for(int z = 0;z < size+1;z++)
       {
         for(int x = 0;x < size+1;x++)
@@ -112,7 +139,7 @@ class TestWorld : public Greet::Scene
       material.Unbind();
 
 #ifdef RENDER_PHYSICS
-      engine.Render(camera);
+      //engine.Render(camera);
 #endif
     }
 
