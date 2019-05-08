@@ -7,14 +7,23 @@
 #include "RayCast.h"
 #include "PlayerCamera.h"
 
+struct ChunkChange
+{
+  bool dirty = false;
+  int minX, minY, minZ;
+  int maxX, maxY, maxZ;
+};
+
 class Chunk
 {
-  friend class World;
+  public:
+    friend class World;
   private:
     static uint CHUNK_WIDTH;
     static uint CHUNK_HEIGHT;
     static uint CHUNK_LENGTH;
 
+    ChunkChange chunkChange;
     MCMesh* mesh;
     std::vector<MCPointData> voxelData;
     Greet::Mesh* originalMesh;
@@ -36,4 +45,12 @@ class Chunk
     void SphereOperation(const Greet::Vec3<float>& point, float radius, std::function<void(MCPointData&, int, int,int, float distanceSQ, bool inside)> func);
     void PlaceVoxels(const Greet::Vec3<float>& point, float radius);
     void RemoveVoxels(const Greet::Vec3<float>& point, float radius);
+
+    void UpdateMesh();
+    void UpdateVoxel(int x, int y, int z, const MCPointData& data);
+    MCPointData& GetVoxelData(int x, int y, int z);
+    const MCPointData& GetVoxelDataConst(int x, int y, int z) const;
+
+    bool IsInside(int x, int y, int z);
+    int GetVoxelIndex(int x, int y, int z);
 };

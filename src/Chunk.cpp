@@ -13,6 +13,7 @@ uint Chunk::CHUNK_HEIGHT = 32;
 uint Chunk::CHUNK_LENGTH = 32;
 
 Chunk::Chunk()
+  : mesh{nullptr}
 {}
 
 void Chunk::Initialize(uint posX, uint posZ)
@@ -45,10 +46,10 @@ void Chunk::Initialize(uint posX, uint posZ)
     {
       for(int x = 0;x<CHUNK_WIDTH+1;x++)
       {
-        int index = x + (y + z * (CHUNK_HEIGHT+1)) * (CHUNK_WIDTH+1);
+        int index = GetVoxelIndex(x,y,z);
         int indexHeight = x + z * (CHUNK_WIDTH+1);
         float height = heightMap[indexHeight] * (CHUNK_HEIGHT+1);
-        MCPointData& data = voxelData[index];
+        MCPointData& data = GetVoxelData(x,y,z);
 
         data.magnitude = (height - y);
         Math::Clamp(&data.magnitude, -1.0f, 1.0f);
@@ -76,7 +77,7 @@ void Chunk::Initialize(uint posX, uint posZ)
     int x = (rand() % (CHUNK_WIDTH - 6)) + 3;
     int z = (rand() % (CHUNK_LENGTH- 6)) + 3;
     int y = heightMap[x + z * (CHUNK_WIDTH+1)] * (CHUNK_HEIGHT+1);
-    if(voxelData[x + (y + z * (CHUNK_HEIGHT+1)) * (CHUNK_WIDTH+1)].magnitude >= 0.0f)
+    if(voxelData[GetVoxelIndex(x,y,z)].magnitude >= 0.0f)
       AddTree(x, y, z);
   }
   for(int z = 0;z<CHUNK_LENGTH+1;z++)
@@ -87,7 +88,7 @@ void Chunk::Initialize(uint posX, uint posZ)
       if(biome[indexHeight] > 0.55)
         for(int y = CHUNK_HEIGHT;y>=0;y--)
         {
-          int index = x + y * (CHUNK_WIDTH+1) + z * (CHUNK_WIDTH+1) * (CHUNK_HEIGHT+1);
+          int index = GetVoxelIndex(x,y,z);
           if(voxelData[index].magnitude >= 0.0f)
           {
             voxelData[index].voxel = Voxel::snow;
@@ -97,6 +98,7 @@ void Chunk::Initialize(uint posX, uint posZ)
     }
   }
   mesh = new MCMesh(voxelData, CHUNK_WIDTH+1, CHUNK_HEIGHT+1, CHUNK_LENGTH+1);
+  chunkChange.dirty = false;
 }
 
 Chunk::~Chunk()
@@ -108,7 +110,7 @@ void Chunk::AddTree(uint x, uint y, uint z)
 {
   for(int i = y; i < y + 5; i++)
   {
-    uint index = x + i * (CHUNK_WIDTH+1) + z * (CHUNK_WIDTH+1) * (CHUNK_HEIGHT+1);
+    uint index = GetVoxelIndex(x,i,z);
     voxelData[index].magnitude = 0.5f;
     voxelData[index].voxel = Voxel::wood;
   }
@@ -132,62 +134,28 @@ void Chunk::PlaceVoxels(const Vec3<float>& point, float radius)
   mesh->UpdateData(voxelData, 9, 10, 10, 1, 1, 1); 
   return;
 #endif
-  bool dirty = false;
-  uint maxX = 0;
-  uint maxY = 0;
-  uint maxZ = 0;
-  uint minX = CHUNK_WIDTH;
-  uint minY = CHUNK_HEIGHT;
-  uint minZ = CHUNK_LENGTH;
   // Vim doesn't like this formatting...
-  SphereOperation(point, radius, [&] (MCPointData& data, int voxelX, int voxelY, int voxelZ, float distanceSQ, bool inside) 
+  SphereOperation(point, radius, [&] (MCPointData& data, int x, int y, int z, float distanceSQ, bool inside) 
       {
-      dirty = true;
-      if(voxelX < minX) minX = voxelX;
-      if(voxelY < minY) minY = voxelY;
-      if(voxelZ < minZ) minZ = voxelZ;
-      if(voxelX > maxX) maxX = voxelX;
-      if(voxelY > maxY) maxY = voxelY;
-      if(voxelZ > maxZ) maxZ = voxelZ;
       data.magnitude = std::max(radius - sqrtf(distanceSQ), data.magnitude);
       Math::Clamp(&data.magnitude, -1.0f, 1.0f);
+      UpdateVoxel(x,y,z, data);
       });
 
-  if(dirty)
-  {
-    mesh->UpdateData(voxelData, minX, minY, minZ, maxX - minX + 1, maxY - minY + 1, maxZ - minZ + 1); 
-  }
+  UpdateMesh();
 }
 
 void Chunk::RemoveVoxels(const Vec3<float>& point, float radius)
 {
-  bool dirty = false;
-  uint maxX = 0;
-  uint maxY = 0;
-  uint maxZ = 0;
-  uint minX = CHUNK_WIDTH;
-  uint minY = CHUNK_HEIGHT;
-  uint minZ = CHUNK_LENGTH;
   // Vim doesn't like this formatting...
-  SphereOperation(point, radius, [&] (MCPointData& data, int voxelX, int voxelY, int voxelZ, float distanceSQ, bool inside) 
+  SphereOperation(point, radius, [&] (MCPointData& data, int x, int y, int z, float distanceSQ, bool inside) 
       {
-      dirty = true;
-      if(voxelX < minX) minX = voxelX;
-      if(voxelY < minY) minY = voxelY;
-      if(voxelZ < minZ) minZ = voxelZ;
-      if(voxelX > maxX) maxX = voxelX;
-      if(voxelY > maxY) maxY = voxelY;
-      if(voxelZ > maxZ) maxZ = voxelZ;
-
       data.magnitude = std::min( sqrtf(distanceSQ) - radius, data.magnitude);
-
       Math::Clamp(&data.magnitude, -1.0f, 1.0f);
+      UpdateVoxel(x,y,z, data);
       });
 
-  if(dirty)
-  {
-    mesh->UpdateData(voxelData, minX, minY, minZ, maxX - minX + 1, maxY - minY + 1, maxZ - minZ + 1); 
-  }
+  UpdateMesh();
 }
 
 void Chunk::SphereOperation(const Vec3<float>& point, float radius, std::function<void(MCPointData&, int, int,int, float distanceSQ, bool inside)> func)
@@ -210,7 +178,7 @@ void Chunk::SphereOperation(const Vec3<float>& point, float radius, std::functio
       {
         float distanceSQ = (Vec3<float>{x,y,z} - p).LengthSQ();
         bool inside = distanceSQ <= radiusSQ;
-        func(voxelData[x + (y + z * (CHUNK_HEIGHT+1)) * (CHUNK_WIDTH+1)], x, y, z, distanceSQ, inside);
+        func(GetVoxelData(x,y,z), x, y, z, distanceSQ, inside);
       }
     }
   }
@@ -239,6 +207,64 @@ IntersectionData Chunk::RayCastChunk(const Camera& camera)
     return data;
   }
   return IntersectionData();
+}
+
+void Chunk::UpdateMesh()
+{
+  if(chunkChange.dirty && mesh)
+  {
+    mesh->UpdateData(voxelData, chunkChange.minX, chunkChange.minY, chunkChange.minZ, chunkChange.maxX - chunkChange.minX + 1,chunkChange.maxY - chunkChange.minY + 1, chunkChange.maxZ - chunkChange.minZ + 1);
+    chunkChange.dirty = false;
+  } 
+}
+
+void Chunk::UpdateVoxel(int x, int y, int z, const MCPointData& data)
+{
+  assert(IsInside(x,y,z) && "UpdateVoxel out of bounds");
+
+  if(chunkChange.dirty)
+  {
+    if(x < chunkChange.minX) chunkChange.minX = x;
+    if(y < chunkChange.minY) chunkChange.minY = y;
+    if(z < chunkChange.minZ) chunkChange.minZ = z;
+    if(x > chunkChange.maxX) chunkChange.maxX = x;
+    if(y > chunkChange.maxY) chunkChange.maxY = y;
+    if(z > chunkChange.maxZ) chunkChange.maxZ = z;
+  }
+  else
+  {
+    chunkChange.minX = x;
+    chunkChange.minY = y;
+    chunkChange.minZ = z;
+    chunkChange.maxX = x;
+    chunkChange.maxY = y;
+    chunkChange.maxZ = z;
+    chunkChange.dirty = true;
+  }
+
+  voxelData[GetVoxelIndex(x,y,z)] = data;
+}
+
+bool Chunk::IsInside(int x, int y, int z)
+{
+  return x >= 0 && x < CHUNK_WIDTH + 1 && x >= 0 && x < CHUNK_HEIGHT + 1 && x >= 0 && x < CHUNK_LENGTH+ 1;
+}
+
+int Chunk::GetVoxelIndex(int x, int y, int z)
+{
+  assert(IsInside(x,y,z) && "GetVoxelIndex out of bounds");
+  return x + (y + z * (CHUNK_HEIGHT+1)) * (CHUNK_WIDTH+1);
+}
+
+MCPointData& Chunk::GetVoxelData(int x, int y, int z)
+{
+  assert(IsInside(x,y,z) && "GetVoxelData out of bounds");
+  return voxelData[x + (y + z * (CHUNK_HEIGHT+1)) * (CHUNK_WIDTH+1)];
+}
+
+const MCPointData& Chunk::GetVoxelDataConst(int x, int y, int z) const
+{
+  return voxelData[x + (y + z * (CHUNK_HEIGHT+1)) * (CHUNK_WIDTH+1)];
 }
 
 void Chunk::Update(float timeElapsed)
