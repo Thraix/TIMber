@@ -75,8 +75,8 @@ class Game : public App
       BYTE* image = ImageUtils::CreateHeightmapImage(noiseMap, 512, 512);
       TextureManager::Add("noiseMap", Texture2D(image, 512, 512));
 
-      crossHair = new Renderable2D({0,0}, {20,20}, 0xffffffff, new Sprite(TextureManager::Get2D("crosshair")), nullptr);
-      Renderable2D* noiseRenderable = new Renderable2D({0,0}, {512,512}, 0xffffffff, new Sprite(TextureManager::Get2D("noiseMap")), nullptr);
+      crossHair = new Renderable2D({0,0}, {20,20}, 0xffffffff, Sprite(TextureManager::Get2D("crosshair")));
+      Renderable2D* noiseRenderable = new Renderable2D({0,0}, {512,512}, 0xffffffff, Sprite(TextureManager::Get2D("noiseMap")));
 #ifdef DEMO
       demo = new MarchingDemo();
       RenderEngine::Add3DScene(demo, "3dscene");

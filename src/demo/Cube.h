@@ -23,7 +23,7 @@ class Cube
     std::vector<Greet::Vec3<float>> vertices;
     Greet::Camera& camera;
     Greet::BatchRenderer* renderer;
-    std::vector<Greet::Renderable2D*> renderables;
+    std::vector<Greet::Renderable2D> renderables;
 
 
   public:
@@ -50,7 +50,7 @@ class Cube
       };
       for(int i = 0;i<8;i++)
       {
-        renderables.push_back(new Greet::Renderable2D{{-10.0f},{20.0f},0xff000000, new Greet::Sprite(Greet::TextureManager::Get2D("select")), nullptr});
+        renderables.push_back(Greet::Renderable2D{{-10.0f},{20.0f},0xff000000, Greet::Sprite(Greet::TextureManager::Get2D("select"))});
       }
       shader2d.Enable();
       GLint texIDs[32];
@@ -73,9 +73,9 @@ class Cube
       for(int i = 0;i<vertices.size();i++)
       {
         Greet::Vec3<float> projection = GetCubeScreenPos(i);
-        renderables[i]->m_position = {projection.x, projection.y};
-        Greet::Window::TransformMousePosToScreen(renderables[i]->m_position);
-        renderables[i]->m_position -= 10.0f;
+        renderables[i].m_position = {projection.x, projection.y};
+        Greet::Window::TransformMousePosToScreen(renderables[i].m_position);
+        renderables[i].m_position -= 10.0f;
       }
     }
 
@@ -113,7 +113,7 @@ class Cube
       for(auto&& renderable : renderables)
       {
         renderer->Submit(renderable);
-        renderer->SubmitString(std::to_string(i), renderable->m_position, Greet::FontManager::Get("roboto", 40),0xff000000);
+        renderer->SubmitString(std::to_string(i), renderable.m_position, Greet::FontManager::Get("roboto", 40),0xff000000);
         i++;
       }
       renderer->End();
@@ -152,9 +152,9 @@ class Cube
             int index = x + (y + z * size) * size;
             data[index].magnitude *= -1;
             if(data[index].magnitude >= 0.0f)
-              renderables[point.first]->m_color = 0xff00ff00;
+              renderables[point.first].m_color = 0xff00ff00;
             else
-              renderables[point.first]->m_color = 0xff000000;
+              renderables[point.first].m_color = 0xff000000;
             mcMesh.UpdateData(data, x,y,z,1,1,1);
           }
         }
