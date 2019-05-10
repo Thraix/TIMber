@@ -55,19 +55,19 @@ void Chunk::Initialize(uint posX, uint posZ)
         Math::Clamp(&data.magnitude, -1.0f, 1.0f);
         data.magnitude = std::min(data.magnitude, (caves[index] - 0.48f) * 50.0f);
         Math::Clamp(&data.magnitude, -1.0f, 1.0f);
-        data.voxel = Voxel::stone;
+        data.voxel = &Voxel::stone;
 
         // Temporary
         if(minerals[index] < min) min = minerals[index];
         if(minerals[index] > max) max = minerals[index];
         //data.magnitude = (minerals[index] - 0.20f) / 0.80f;
         if(minerals[index] > 0.60)
-          data.voxel = Voxel::royalium;
+          data.voxel = &Voxel::royalium;
         if(minerals[index] < 0.40)
-          data.voxel = Voxel::malachite;
+          data.voxel = &Voxel::malachite;
         if(heightMap[indexHeight] * (CHUNK_HEIGHT+1) - 4 < y)
         {
-          data.voxel = Voxel::grass;
+          data.voxel = &Voxel::grass;
         }
       }
     }
@@ -91,7 +91,7 @@ void Chunk::Initialize(uint posX, uint posZ)
           int index = GetVoxelIndex(x,y,z);
           if(voxelData[index].magnitude >= 0.0f)
           {
-            voxelData[index].voxel = Voxel::snow;
+            voxelData[index].voxel = &Voxel::snow;
             break;
           }
         }
@@ -112,14 +112,14 @@ void Chunk::AddTree(uint x, uint y, uint z)
   {
     uint index = GetVoxelIndex(x,i,z);
     voxelData[index].magnitude = 0.5f;
-    voxelData[index].voxel = Voxel::wood;
+    voxelData[index].voxel = &Voxel::wood;
   }
   // Vim doesn't like this formatting...
   SphereOperation(Vec3<float>(x + posX * CHUNK_WIDTH,y + 6, z + posZ * CHUNK_LENGTH), 3, [&] (MCPointData& data, int voxelX, int voxelY, int voxelZ, float distanceSQ, bool inside) 
       {
       if(inside)
       {
-      data.voxel = Voxel::leaves;
+      data.voxel = &Voxel::leaves;
       }
       data.magnitude = std::max(3 - sqrtf(distanceSQ), data.magnitude);
       Math::Clamp(&data.magnitude, -1.0f, 1.0f);
@@ -311,9 +311,9 @@ void Chunk::Update(float timeElapsed)
           int index = x + y * (CHUNK_WIDTH+1) + z * (CHUNK_WIDTH+1) * (CHUNK_HEIGHT+1);
           if(voxelData[index].magnitude >= 0.0f)
           {
-            if(voxelData[index].voxel != Voxel::snow)
+            if(voxelData[index].voxel != &Voxel::snow)
             {
-              voxelData[index].voxel = Voxel::snow;
+              voxelData[index].voxel = &Voxel::snow;
               mesh->UpdateData(voxelData, x,y,z, 1, 1, 1);
             }
             break;

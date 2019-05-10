@@ -55,17 +55,17 @@ class TestWorld : public Greet::Scene
       {
         for(int x = 1;x<10;x++)
         {
-          SetDataPoint({Voxel::grass, 0.5}, x,1,z);
+          SetDataPoint({&Voxel::grass, 0.5}, x,1,z);
         }
       }
       for(int z = 4;z<7;z++)
       {
         for(int x = 4;x<7;x++)
         {
-          SetDataPoint({Voxel::grass, 0.2}, x,2,z);  
+          SetDataPoint({&Voxel::grass, 0.2}, x,2,z);  
         }
       }
-          SetDataPoint({Voxel::grass, 0.5}, 5,2,5);  
+          SetDataPoint({&Voxel::grass, 0.5}, 5,2,5);  
       mesh = new MCMesh(data, size, size, size);
       Greet::Window::GrabMouse(true);
 
@@ -151,12 +151,12 @@ class TestWorld : public Greet::Scene
         Greet::MousePressEvent& e = (Greet::MousePressEvent&)event;
         if(e.GetButton() == GLFW_MOUSE_BUTTON_1)
         {
-          SetDataPoint({false}, 3, 1, 1);
+          SetDataPoint({&Voxel::grass, -0.5f}, 3, 1, 1);
           mesh->UpdateData(data, 3, 1, 1, 1, 1, 1);
         }
         else if(e.GetButton() == GLFW_MOUSE_BUTTON_2)
         {
-          SetDataPoint({true}, 3, 1, 1);
+          SetDataPoint({&Voxel::grass, -0.5f}, 3, 1, 1);
           mesh->UpdateData(data, 3, 1, 1, 1, 1, 1);
         }
       }

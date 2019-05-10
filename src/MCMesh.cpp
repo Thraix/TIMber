@@ -148,7 +148,7 @@ void MCMesh::UpdateData(const std::vector<MCPointData>& data, int xOffset, int y
 #endif
 }
 
-void MCMesh::Bind()
+void MCMesh::Bind() const
 {
   vao.Enable();
   vbo_position.Enable();
@@ -156,11 +156,11 @@ void MCMesh::Bind()
   GLCall(glEnable(GL_CULL_FACE));
   GLCall(glFrontFace(GL_CCW));
 }
-void MCMesh::Render()
+void MCMesh::Render() const
 {
   GLCall(glDrawElements(GL_TRIANGLES, faces.size() * 3 * sizeof(uint), GL_UNSIGNED_INT,0));
 }
-void MCMesh::Unbind()
+void MCMesh::Unbind() const
 {
   ibo.Disable();
   vbo_position.Disable();
@@ -216,12 +216,12 @@ const Vec4& MCMesh::GetColor(size_t edge, const Vec3<size_t>& voxel)
   uint indexMin = (vMin.x + voxel.x) + ((vMin.y + voxel.y) + (vMin.z + voxel.z) * height) * width;
   if(voxelData[indexMin].magnitude >= 0.0f)
   {
-    return voxelData[indexMin].voxel.color;
+    return voxelData[indexMin].voxel->color;
   }
   else
   {
     uint indexMax = (vMax.x + voxel.x) + ((vMax.y + voxel.y) + (vMax.z + voxel.z) * height) * width;
-    return voxelData[indexMax].voxel.color;
+    return voxelData[indexMax].voxel->color;
   }
 }
 

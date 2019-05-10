@@ -9,6 +9,9 @@
       "name": "crosshair"
     },
     {
+      "name": "select"
+    },
+    {
       "name": "terrainCursor"
     }
   ]

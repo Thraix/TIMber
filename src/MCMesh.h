@@ -61,9 +61,9 @@ class MCMesh
     void UpdateData(const std::vector<MCPointData>& data, int xOffset, int yOffset, int zOffset, uint w, uint h, uint l);
     void UpdateBuffer(Greet::Buffer& buffer, void* data, size_t size);
 
-    void Bind();
-    void Render();
-    void Unbind();
+    void Bind() const;
+    void Render() const;
+    void Unbind() const;
 
     const std::vector<Face>& GetFaces() const { return faces; } 
     const std::vector<Greet::Vec3<float>>& GetVertices() const { return vertices; } 

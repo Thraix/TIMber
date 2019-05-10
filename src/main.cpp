@@ -2,9 +2,11 @@
 
 #include "World.h"
 #include "TestWorld.h"
+#include "demo/MarchingDemo.h"
 #include "LineRenderer.h"
 
 //#define TESTING
+//#define DEMO
 
 using namespace Greet;
 class CrossHairLayer : public Layer
@@ -33,10 +35,14 @@ class Game : public App
 {
   private:
 
+#ifdef DEMO
+    MarchingDemo* demo;
+#else
 #ifndef TESTING
     World* world;
 #else
     TestWorld* world;
+#endif
 #endif
     Layer3D* lineLayer;
     CrossHairLayer* layer;
@@ -51,8 +57,12 @@ class Game : public App
 
     ~Game()
     {
+#ifndef DEMO
       delete world;
       delete layer;
+#else
+      delete demo;
+#endif
       LineRenderer::DestroyInstance();
     }
 
@@ -66,16 +76,21 @@ class Game : public App
 
       crossHair = new Renderable2D({0,0}, {20,20}, 0xffffffff, new Sprite(TextureManager::Get2D("crosshair")), nullptr);
       Renderable2D* noiseRenderable = new Renderable2D({0,0}, {512,512}, 0xffffffff, new Sprite(TextureManager::Get2D("noiseMap")), nullptr);
-      layer = new CrossHairLayer(crossHair);
-      // layer->Add(noiseRenderable);
-
+#ifdef DEMO
+      demo = new MarchingDemo();
+      RenderEngine::Add3DScene(demo, "3dscene");
+      Window::SetBackgroundColor(Vec4(0.5f,0.5f,0.5f, 1.0f));
+#else 
 #ifndef TESTING
-      world = new World(2, 2);
+      world = new World(3, 3);
 #else
       world = new TestWorld();
 #endif
+      layer = new CrossHairLayer(crossHair);
+      // layer->Add(noiseRenderable);
       RenderEngine::Add3DScene(world, "3dscene");
       RenderEngine::Add2DScene(layer, "crosshair");
+#endif
     }
 
     void Tick()

@@ -45,6 +45,8 @@ class Voxel
     }
 
   public:
+    virtual ~Voxel()
+    {}
     Voxel(size_t id) : id{id} {}
     Voxel& SetColor(const Greet::Vec4& color) { this->color = color; return *this; }
 

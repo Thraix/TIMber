@@ -6,7 +6,7 @@
 
 struct MCPointData
 {
-  Voxel voxel = Voxel::grass;
+  const Voxel* voxel = &Voxel::grass;
   float magnitude = -0.5f; // from 0 - 1 
 };
 
