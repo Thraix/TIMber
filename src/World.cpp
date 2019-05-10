@@ -109,7 +109,7 @@ void World::PlaceVoxels()
         for(int x = chunkX - 1; x < chunkX + 2; x++)
         {
           if(x >= 0 && x < width)
-            chunks[x + z * width].PlaceVoxels(chunkIntersection.intersectionPoint, 2);
+            chunks[x + z * width].PlaceVoxels(chunkIntersection.intersectionPoint, 4);
         }
       }
     }
@@ -130,7 +130,7 @@ void World::RemoveVoxels()
         for(int x = chunkX - 1; x < chunkX + 2; x++)
         {
           if(x >= 0 && x < width)
-            chunks[x + z * width].RemoveVoxels(chunkIntersection.intersectionPoint, 2);
+            chunks[x + z * width].RemoveVoxels(chunkIntersection.intersectionPoint, 4);
         }
       }
     }

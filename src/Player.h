@@ -17,6 +17,8 @@ class Player
     bool up = false;
     bool down = false;
     bool mouseGrab = true;
+    bool mouseDown = false;
+    int mouseButton = 0;
   };
 
   struct PlayerMovement final

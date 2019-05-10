@@ -31,9 +31,9 @@ void Player::Render() const
   playerModel.model->PostRender();
   playerModel.model->UnbindShader(nullptr, &camera);
 }
-
 void Player::Update(float timeElapsed)
 {
+  static float t = 0.0f;
   // Temporary pause
   if(!playerControl.mouseGrab)
     return;
@@ -47,6 +47,18 @@ void Player::Update(float timeElapsed)
   if(playerControl.down) playerMovement.velocity.y = -1;
   if(playerControl.forward) playerMovement.velocity.z = -1;
   if(playerControl.backward) playerMovement.velocity.z = 1;
+  if(playerControl.mouseDown)
+  {
+    t += timeElapsed;
+    if(t>= 1/60.0f)
+    {
+      if(playerControl.mouseButton == GLFW_MOUSE_BUTTON_1)
+        world->RemoveVoxels();
+      if(playerControl.mouseButton == GLFW_MOUSE_BUTTON_2)
+        world->PlaceVoxels();
+      t -= 1/60.0f;
+    } 
+  }
 
   Vec2 movement{playerMovement.velocity.x, playerMovement.velocity.z};
   movement.Rotate(camera.GetYaw());
@@ -164,10 +176,14 @@ void Player::OnEvent(Event& event)
   else if(EVENT_IS_TYPE(event, EventType::MOUSE_PRESS))
   {
     MousePressEvent& e = (MousePressEvent&)event;
-    if(e.GetButton() == GLFW_MOUSE_BUTTON_1)
-      world->RemoveVoxels();
-    if(e.GetButton() == GLFW_MOUSE_BUTTON_2)
-      world->PlaceVoxels();
+    playerControl.mouseDown = true;
+    playerControl.mouseButton = e.GetButton();
+  }
+  else if(EVENT_IS_TYPE(event, EventType::MOUSE_RELEASE))
+  {
+    MouseReleaseEvent& e = (MouseReleaseEvent&)event;
+    playerControl.mouseDown = false;
+    playerControl.mouseButton = e.GetButton();
   }
 }
 
