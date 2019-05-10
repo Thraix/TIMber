@@ -6,7 +6,7 @@
 #include "LineRenderer.h"
 
 //#define TESTING
-#define DEMO
+//#define DEMO
 
 using namespace Greet;
 class CrossHairLayer : public Layer

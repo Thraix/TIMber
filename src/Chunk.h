@@ -42,9 +42,6 @@ class Chunk
     Greet::Mat4 GetTransformationMatrix() const { return Greet::Mat4::Translate({posX * CHUNK_WIDTH, 0 , posZ * CHUNK_LENGTH});}
     IntersectionData RayCastChunk(const Greet::Camera& camera);
 
-    void SphereOperation(const Greet::Vec3<float>& point, float radius, std::function<void(MCPointData&, int, int,int, float distanceSQ, bool inside)> func);
-    void PlaceVoxels(const Greet::Vec3<float>& point, float radius);
-    void RemoveVoxels(const Greet::Vec3<float>& point, float radius);
 
     void UpdateMesh();
     void UpdateVoxel(int x, int y, int z, const MCPointData& data);
