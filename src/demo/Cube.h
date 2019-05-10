@@ -1,5 +1,6 @@
 #pragma once
 
+#include <graphics/fonts/FontManager.h>
 #include <graphics/models/Mesh.h>
 #include <graphics/models/Material.h>
 #include <graphics/models/MeshFactory.h>
@@ -28,7 +29,7 @@ class Cube
   public:
     Cube(Greet::Camera& camera, size_t size)
       : size{size}, material{Greet::Shader::FromFile("res/shaders/terrain.shader")}, 
-      shader2d{Greet::ShaderFactory::DefaultShader()},
+      shader2d{Greet::Shader::FromFile("res/shaders/2dshader.shader")},
       data{(size*size*size)},
       mcMesh(data, size, size, size), camera{camera}
     {
@@ -51,6 +52,15 @@ class Cube
       {
         renderables.push_back(new Greet::Renderable2D{{-10.0f},{20.0f},0xff000000, new Greet::Sprite(Greet::TextureManager::Get2D("select")), nullptr});
       }
+      shader2d.Enable();
+      GLint texIDs[32];
+      for (int i = 0; i < 32; i++)
+      {
+        texIDs[i] = i;
+      }
+      shader2d.Enable();
+      shader2d.SetUniform1iv("textures", 32, texIDs);
+      shader2d.Disable();
     }
 
     virtual ~Cube()
@@ -99,8 +109,13 @@ class Cube
       shader2d.Enable();
       shader2d.SetUniformMat3("pr_matrix", Greet::Mat3::Orthographic(0, Greet::Window::GetWidth(), 0, Greet::Window::GetHeight()));
       renderer->Begin();
+      int i = 0;
       for(auto&& renderable : renderables)
+      {
         renderer->Submit(renderable);
+        renderer->SubmitString(std::to_string(i), renderable->m_position, Greet::FontManager::Get("roboto", 40),0xff000000);
+        i++;
+      }
       renderer->End();
       renderer->Flush();
       shader2d.Disable();

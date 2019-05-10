@@ -6,7 +6,7 @@
 #include "LineRenderer.h"
 
 //#define TESTING
-//#define DEMO
+#define DEMO
 
 using namespace Greet;
 class CrossHairLayer : public Layer
@@ -70,6 +70,7 @@ class Game : public App
     {
       LineRenderer::CreateInstance();
       Loaders::LoadTextures("res/textures.json");
+      FontManager::Add(new FontContainer("res/fonts/Roboto-Black.ttf","roboto"));
       float* noiseMap = Noise::GenNoise(512, 512, 5, 128, 128, 0.75f);
       BYTE* image = ImageUtils::CreateHeightmapImage(noiseMap, 512, 512);
       TextureManager::Add("noiseMap", Texture2D(image, 512, 512));

@@ -26,6 +26,7 @@ void LineRenderer::DrawLine(const Camera& camera, const Vec3<float>& p1, const V
   shader.SetUniformMat4("projectionMatrix", camera.GetProjectionMatrix());
   shader.SetUniformMat4("viewMatrix", camera.GetViewMatrix());
   shader.SetUniform4f("lineColor", color);
+  GLCall(glLineWidth(5.0f));
 
   vbo.Enable();
   Vec3<float>* buffer = (Vec3<float>*)vbo.MapBuffer();
