@@ -143,10 +143,12 @@ void World::PlaceVoxels()
         {
         float max = std::max(radius - sqrtf(distanceSQ), data.magnitude);
         if(data.magnitude < max)
+        {
         data.magnitude += (radius - sqrtf(distanceSQ)) * 0.1f;
         Math::Clamp(&data.magnitude, -1.0f, 1.0f);
         // UpdateVoxel(x,y,z, data);
         UpdateVoxel(chunkPos, chunkOffset, data);
+        }
 
         }
         });
@@ -178,10 +180,13 @@ void World::RemoveVoxels()
         {
         float min = std::min(sqrtf(distanceSQ) - radius, data.magnitude);
         if(data.magnitude > min)
+        {
         data.magnitude += (sqrtf(distanceSQ) - radius) * 0.1f;
         Math::Clamp(&data.magnitude, -1.0f, 1.0f);
         // UpdateVoxel(x,y,z, data);
         UpdateVoxel(chunkPos, chunkOffset, data);
+
+        }
 
         }
         });

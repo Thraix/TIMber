@@ -6,12 +6,12 @@
   "grass": {
     "id": 1,
     "name": "Grass",
-    "color": "#00ff00"
+    "color": "#34c442"
   },
   "stone": {
     "id": 2,
     "name": "Stone",
-    "color": "#888888"
+    "color": "#88807c"
   },
   "royalium": {
     "id": 3,
@@ -26,7 +26,7 @@
   "snow": {
     "id": 5,
     "name": "Snow",
-    "color": "#ffffff"
+    "color": "#bed6f6"
   },
   "wood": {
     "id": 6,
