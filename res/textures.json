@@ -13,6 +13,12 @@
     },
     {
       "name": "terrainCursor"
+    },
+    {
+      "name": "material"
+    },
+    {
+      "name": "selected_material"
     }
   ]
 }
