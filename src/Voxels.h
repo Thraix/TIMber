@@ -42,6 +42,7 @@ class Voxel
       {
         Greet::Log::Error("Could not find voxel with name \"", voxelName, "\"");
       }
+      voxels.emplace(*this);
     }
 
   public:
@@ -50,17 +51,17 @@ class Voxel
     Voxel(size_t id) : id{id} {}
     Voxel& SetColor(const Greet::Vec4& color) { this->color = color; return *this; }
 
-    bool operator<(const Voxel& rhs)
+    bool operator<(const Voxel& rhs) const
     {
       return id < rhs.id;
     }
 
-    bool operator!=(const Voxel& rhs)
+    bool operator!=(const Voxel& rhs) const
     {
       return id != rhs.id;
     }
 
-    bool operator==(const Voxel& rhs)
+    bool operator==(const Voxel& rhs) const
     {
       return id == rhs.id;
     }
@@ -74,4 +75,6 @@ class Voxel
     static const Voxel snow;
     static const Voxel wood;
     static const Voxel leaves;
+
+    static const Voxel& FindById(size_t id);
 };

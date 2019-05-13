@@ -3,6 +3,8 @@
 #include <graphics/models/TPCamera.h>
 #include <graphics/renderers/BatchRenderer3D.h>
 #include "PlayerCamera.h"
+#include "Inventory.h"
+#include "InventoryScene.h"
 
 class World;
 
@@ -53,6 +55,8 @@ class Player
   };
 
   private:
+    Inventory inventory;
+    InventoryScene invScene;
     PlayerCamera camera;
     Greet::Vec3<float> position;
     PlayerMovement playerMovement;
@@ -74,7 +78,7 @@ class Player
 
     const PlayerCamera& GetCamera() const;
     const Greet::Vec3<float>& GetPosition() const { return position; }
-    const float GetReach() const { return 8; };
+    const float GetReach() const { return 20; };
 
   private:
     void Move(float timeElapsed);

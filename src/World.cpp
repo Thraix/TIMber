@@ -24,13 +24,6 @@ World::World(uint width, uint length)
 void World::Render() const 
 {
   skybox.Render(player.GetCamera());
-  if(chunkIntersection.hasIntersection)
-  {
-    LineRenderer::GetInstance().DrawLine(player.GetCamera(), chunkIntersection.v1, chunkIntersection.v2, Vec4(1,1,1,1));
-    LineRenderer::GetInstance().DrawLine(player.GetCamera(), chunkIntersection.v2, chunkIntersection.v3, Vec4(1,1,1,1));
-    LineRenderer::GetInstance().DrawLine(player.GetCamera(), chunkIntersection.v3, chunkIntersection.v1, Vec4(1,1,1,1));
-    cursor.Render(player.GetCamera(), chunkIntersection);
-  }
 
   terrainMaterial.Bind(&player.GetCamera());
   noiseTexture.Enable();
@@ -54,6 +47,16 @@ void World::Render() const
   noiseTexture.Disable();
   terrainMaterial.Unbind();
   player.Render();
+
+  if(chunkIntersection.hasIntersection)
+  {
+#if 0
+    LineRenderer::GetInstance().DrawLine(player.GetCamera(), chunkIntersection.v1, chunkIntersection.v2, Vec4(1,1,1,1));
+    LineRenderer::GetInstance().DrawLine(player.GetCamera(), chunkIntersection.v2, chunkIntersection.v3, Vec4(1,1,1,1));
+    LineRenderer::GetInstance().DrawLine(player.GetCamera(), chunkIntersection.v3, chunkIntersection.v1, Vec4(1,1,1,1));
+#endif
+    cursor.Render(player.GetCamera(), chunkIntersection);
+  }
 }
 
 void World::Update(float timeElapsed) 
@@ -81,6 +84,8 @@ void World::Update(float timeElapsed)
       } 
     }
   }
+  if(chunkIntersection.distanceFromNear > player.GetReach())
+    chunkIntersection.hasIntersection = false;
   for(int z = 0;z<length;z++)
   {
     for(int x = 0;x<width;x++)
@@ -89,6 +94,7 @@ void World::Update(float timeElapsed)
 
     }
   }
+  cursor.Update(timeElapsed); 
 }
 
 void World::OnEvent(Greet::Event& event) 
@@ -122,13 +128,16 @@ void World::SphereOperation(const Vec3<float>& point, float radius, std::functio
 }
 
 
-void World::PlaceVoxels()
+float World::PlaceVoxels(const Voxel& voxel, float amount)
 {
+  float used = 0.0f;
   if(chunkIntersection.hasIntersection)
   {
     int radius = 4;
     SphereOperation(chunkIntersection.intersectionPoint, radius, [&] (MCPointData data, int x, int y, int z, float distanceSQ, bool inside)
         {
+        if(used >= amount)
+        return;
         Vec3<int> chunkOffset = GetChunkOffset(x,y,z);
         Vec3<int> chunkPos = GetChunkPos(x,y,z);
 
@@ -144,9 +153,21 @@ void World::PlaceVoxels()
         float max = std::max(radius - sqrtf(distanceSQ), data.magnitude);
         if(data.magnitude < max)
         {
+        float lastMag = data.magnitude < 0 ? 0 : data.magnitude;
         data.magnitude += (radius - sqrtf(distanceSQ)) * 0.1f;
         Math::Clamp(&data.magnitude, -1.0f, 1.0f);
         // UpdateVoxel(x,y,z, data);
+        float voxelUsed = data.magnitude - lastMag;
+        if(voxelUsed > 0.0f)
+        {
+          data.voxel = &voxel;
+          used += voxelUsed/3.0f;
+          if(used > amount)
+          {
+            data.magnitude -= used - amount;
+            used = amount;
+          }
+        }
         UpdateVoxel(chunkPos, chunkOffset, data);
         }
 
@@ -154,11 +175,13 @@ void World::PlaceVoxels()
         });
     UpdateChunks();
   }
+  return used;
 }
 
 
-void World::RemoveVoxels()
+std::map<size_t, float> World::RemoveVoxels()
 {
+  std::map<size_t, float> removed;
   if(chunkIntersection.hasIntersection)
   {
     int radius = 4;
@@ -166,8 +189,6 @@ void World::RemoveVoxels()
         {
         Vec3<int> chunkOffset = GetChunkOffset(x,y,z);
         Vec3<int> chunkPos = GetChunkPos(x,y,z);
-
-        //MCPointData& = GetChunk(chunkPos);
 
         if(
             (x > 0 && GetVoxelData(x-1,y,z).magnitude < 0.0f) ||
@@ -178,11 +199,22 @@ void World::RemoveVoxels()
             (z < Chunk::CHUNK_LENGTH*length && GetVoxelData(x,y,z+1).magnitude < 0.0f)
           )
         {
+        float lastMag = data.magnitude > 0.0f ? data.magnitude : 0.0f;
         float min = std::min(sqrtf(distanceSQ) - radius, data.magnitude);
         if(data.magnitude > min)
         {
         data.magnitude += (sqrtf(distanceSQ) - radius) * 0.1f;
         Math::Clamp(&data.magnitude, -1.0f, 1.0f);
+        float mag = data.magnitude > 0.0f ? data.magnitude : 0.0f;
+        if(lastMag - mag > 0.0f)
+        {
+          auto it = removed.find(data.voxel->id);
+          if(it != removed.end())
+            it->second += (lastMag - mag) / 3.0f;
+          else
+            removed.emplace(data.voxel->id, (lastMag - mag) / 3.0f);
+        }
+
         // UpdateVoxel(x,y,z, data);
         UpdateVoxel(chunkPos, chunkOffset, data);
 
@@ -192,6 +224,7 @@ void World::RemoveVoxels()
         });
     UpdateChunks();
   }
+  return removed;
 }
 
 void World::UpdateChunks()

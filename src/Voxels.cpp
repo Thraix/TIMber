@@ -14,3 +14,8 @@ const Voxel Voxel::malachite = Voxel{"malachite"};
 const Voxel Voxel::snow = Voxel{"snow"};
 const Voxel Voxel::wood = Voxel{"wood"};
 const Voxel Voxel::leaves = Voxel{"leaves"};
+
+const Voxel& Voxel::FindById(size_t id)
+{
+  return *voxels.find(id);
+}

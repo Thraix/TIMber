@@ -12,8 +12,9 @@ PlayerCamera Player::CreateCamera()
 }
 
 Player::Player(World* world, const Greet::Vec3<float>& position)
-  : camera{CreateCamera()}, position{position}, world{world}
+  : invScene{inventory}, camera{CreateCamera()}, position{position}, world{world}
 {
+  RenderEngine::Add2DScene(&invScene, "inventory");
 }
 
 void Player::OnWorldInit()
@@ -53,9 +54,18 @@ void Player::Update(float timeElapsed)
     if(t>= 1/60.0f)
     {
       if(playerControl.mouseButton == GLFW_MOUSE_BUTTON_1)
-        world->RemoveVoxels();
+      {
+        std::map<size_t, float> removed = world->RemoveVoxels();
+        for(auto it = removed.begin(); it != removed.end(); it++)
+        {
+          inventory.AddMaterials(it->first, it->second);
+        }
+      }
       if(playerControl.mouseButton == GLFW_MOUSE_BUTTON_2)
-        world->PlaceVoxels();
+      {
+        float used = world->PlaceVoxels(inventory.GetCurrentMaterial(), inventory.GetCurrentMaterialAmount());
+        inventory.RemoveMaterials(inventory.GetCurrentMaterial().id, used);
+      }
       t -= 1/60.0f;
     } 
   }
@@ -184,6 +194,11 @@ void Player::OnEvent(Event& event)
     MouseReleaseEvent& e = (MouseReleaseEvent&)event;
     playerControl.mouseDown = false;
     playerControl.mouseButton = e.GetButton();
+  }
+  else if(EVENT_IS_TYPE(event, EventType::MOUSE_SCROLL))
+  {
+    MouseScrollEvent& e = (MouseScrollEvent&)event;
+    inventory.ChangeMaterial(-e.GetScrollVertical());
   }
 }
 

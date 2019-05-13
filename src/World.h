@@ -37,8 +37,8 @@ class World : public Greet::Scene
     void OnEvent(Greet::Event& event) override;
 
 
-    void PlaceVoxels();
-    void RemoveVoxels();
+    float PlaceVoxels(const Voxel& voxel, float amount);
+    std::map<size_t, float> RemoveVoxels();
 
     void PlacingFunction();
 
