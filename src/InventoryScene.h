@@ -49,5 +49,11 @@ class InventoryScene : public Greet::Layer
         renderer->SubmitString(amountStr, {10.0f + 32 - font->GetWidthOfText(amountStr)* 0.5f, yPos + 60.0f}, font, 0xffffffff);
       }
     }
+
+    void WindowResize(Greet::WindowResizeEvent& event) override
+    {
+      SetProjectionMatrix(Greet::Mat3::Orthographic(0, event.GetWidth(), 0, event.GetHeight()));
+    }
+
 };
 

@@ -200,6 +200,11 @@ void Player::OnEvent(Event& event)
     MouseScrollEvent& e = (MouseScrollEvent&)event;
     inventory.ChangeMaterial(-e.GetScrollVertical());
   }
+  else if(EVENT_IS_TYPE(event, EventType::WINDOW_RESIZE))
+  {
+    WindowResizeEvent& e = (WindowResizeEvent&)event;
+    camera.SetProjectionMatrix(Greet::Mat4::ProjectionMatrix(Window::GetAspect(), 90.0, 0.01, 1000.0));
+  }
 }
 
 const PlayerCamera& Player::GetCamera() const

@@ -20,14 +20,10 @@ class CrossHairLayer : public Layer
       crossHair->SetPosition(Vec2((Window::GetWidth() - crossHair->GetSize().w) * 0.5f, (Window::GetHeight() - crossHair->GetSize().h)* 0.5f));
     }
 
-    void OnEvent(Event& e) override
+    void WindowResize(WindowResizeEvent& event) override
     {
-      if(EVENT_IS_TYPE(e, EventType::WINDOW_RESIZE))
-      {
-        WindowResizeEvent& event = (WindowResizeEvent&)e;
-        SetProjectionMatrix(Mat3::Orthographic(0,event.GetWidth(), 0, event.GetHeight()));
-        crossHair->SetPosition(Vec2((event.GetWidth() - crossHair->GetSize().w) * 0.5f, (event.GetHeight() - crossHair->GetSize().h)* 0.5f));
-      }
+      SetProjectionMatrix(Mat3::Orthographic(0,event.GetWidth(), 0, event.GetHeight()));
+      crossHair->SetPosition(Vec2((event.GetWidth() - crossHair->GetSize().w) * 0.5f, (event.GetHeight() - crossHair->GetSize().h)* 0.5f));
     }
 };
 
@@ -35,7 +31,7 @@ class Game : public App
 {
   private:
 
-#ifdef DEMO
+    #ifdef DEMO
     MarchingDemo* demo;
 #else
 #ifndef TESTING

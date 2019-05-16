@@ -99,6 +99,7 @@ void World::Update(float timeElapsed)
 
 void World::OnEvent(Greet::Event& event) 
 {
+  Scene::OnEvent(event);
   player.OnEvent(event);
 }
 
