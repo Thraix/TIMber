@@ -17,11 +17,12 @@ class MCClassification
     {
       Greet::Vec3<float> v1 = vertices[edges[edge].first];
       Greet::Vec3<float> v2 = vertices[edges[edge].second];
+      return (v1 + v2) * 0.5f;
       MCPointData d1 = data[(x + v1.x) + ((y + v1.y) + (z + v1.z) * height) * width];
       MCPointData d2 = data[(x + v2.x) + ((y + v2.y) + (z + v2.z) * height) * width];
 
       float t = 0.5;
-      if(d1.magnitude < 0.0f)
+      if(d1.Inhabited())
       {
         // d1.magnitude is negative we want abs total
         float total = d2.magnitude - d1.magnitude;
@@ -39,19 +40,21 @@ class MCClassification
 
     static const MCPointData& GetDataPoint(const std::vector<MCPointData>& data, uint x, uint y, uint z, uint width, uint height, uint length)
     {
-        return data[x + y * width  + z * width * height];
+      return data[x + y * width  + z * width * height];
     }
 
     static std::vector<Greet::Vec3<size_t>> GetMarchingCubeFaces(const std::vector<MCPointData>& data, uint x, uint y, uint z, uint width, uint height, uint length)
     {
       byte classification = 0;
-      for(auto&& vertex : vertices)
-      {
-        classification >>= 1;
-        const MCPointData& point = data[(x + (size_t)vertex.x) + (y + (size_t)vertex.y) * width  + (z + (size_t)vertex.z) * width * height];
-        if(point.magnitude >= 0)
-          classification |= 0x80; // 0b1000000
-      }
+
+      if(GetDataPoint(data, x  , y  , z  , width, height, length).magnitude < 0.0) classification |= 0x01;
+      if(GetDataPoint(data, x+1, y  , z  , width, height, length).magnitude < 0.0) classification |= 0x02;
+      if(GetDataPoint(data, x+1, y+1, z  , width, height, length).magnitude < 0.0) classification |= 0x04;
+      if(GetDataPoint(data, x  , y+1, z  , width, height, length).magnitude < 0.0) classification |= 0x08;
+      if(GetDataPoint(data, x  , y  , z+1, width, height, length).magnitude < 0.0) classification |= 0x10;
+      if(GetDataPoint(data, x+1, y  , z+1, width, height, length).magnitude < 0.0) classification |= 0x20;
+      if(GetDataPoint(data, x+1, y+1, z+1, width, height, length).magnitude < 0.0) classification |= 0x40;
+      if(GetDataPoint(data, x  , y+1, z+1, width, height, length).magnitude < 0.0) classification |= 0x80;
 
       std::vector<Greet::Vec3<size_t>> faces = classifications[classification];
       std::vector<Greet::Vec3<size_t>> result;

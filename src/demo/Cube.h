@@ -159,7 +159,7 @@ class Cube
             int z = ceil(vertices[point.first].z) + (size - 2) / 2;
             int index = x + (y + z * size) * size;
             data[index].magnitude *= -1;
-            if(data[index].magnitude >= 0.0f)
+            if(data[index].Inhabited())
               renderables[point.first].m_color = 0xff00ff00;
             else
               renderables[point.first].m_color = 0xff000000;

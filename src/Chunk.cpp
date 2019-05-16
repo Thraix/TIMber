@@ -52,8 +52,17 @@ void Chunk::Initialize(uint posX, uint posZ)
         MCPointData& data = GetVoxelData(x,y,z);
 
         data.magnitude = (y - height);
+        // D = 1 - cave
+        // cave = 1 -D
         Math::Clamp(&data.magnitude, -1.0f, 1.0f);
-        data.magnitude = std::max(data.magnitude, -(caves[index] - 0.48f) * 50.0f);
+#if 0
+        float p = 2;
+        float cave = (caves[index] - 0.48f) * 50.0f;
+        Math::Clamp(&cave, -1.0f, 1.0f);
+        data.magnitude = 1.0f - powf(powf(1 - data.magnitude, -p) + powf((1+cave), -p), -1.0f/p);
+#else
+        data.magnitude = std::max(data.magnitude, -(caves[index] - 0.48f) * 30.0f);
+#endif
         Math::Clamp(&data.magnitude, -1.0f, 1.0f);
         data.voxel = &Voxel::stone;
 
@@ -89,7 +98,7 @@ void Chunk::Initialize(uint posX, uint posZ)
         for(int y = CHUNK_HEIGHT;y>=0;y--)
         {
           int index = GetVoxelIndex(x,y,z);
-          if(voxelData[index].magnitude < 0.0f)
+          if(voxelData[index].Inhabited())
           {
             voxelData[index].voxel = &Voxel::snow;
             break;
@@ -230,7 +239,7 @@ void Chunk::Update(float timeElapsed)
         for(int y = CHUNK_HEIGHT;y>=0;y--)
         {
           int index = x + y * (CHUNK_WIDTH+1) + z * (CHUNK_WIDTH+1) * (CHUNK_HEIGHT+1);
-          if(voxelData[index].magnitude >= 0.0f)
+          if(voxelData[index].Inhabited())
           {
             if(voxelData[index].voxel != &Voxel::snow)
             {

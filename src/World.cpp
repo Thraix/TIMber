@@ -142,18 +142,18 @@ float World::PlaceVoxels(const Voxel& voxel, float amount)
         Vec3<int> chunkPos = GetChunkPos(x,y,z);
 
         if(
-            (x > 0 && GetVoxelData(x-1,y,z).magnitude < 0.0f) ||
-            (y > 0 && GetVoxelData(x,y-1,z).magnitude < 0.0f) ||
-            (z > 0 && GetVoxelData(x,y,z-1).magnitude < 0.0f) ||
-            (x < Chunk::CHUNK_WIDTH*width && GetVoxelData(x+1,y,z).magnitude < 0.0f) ||
-            (y < Chunk::CHUNK_HEIGHT && GetVoxelData(x,y+1,z).magnitude < 0.0f) ||
-            (z < Chunk::CHUNK_LENGTH*length && GetVoxelData(x,y,z+1).magnitude < 0.0f)
+            (x > 0 && GetVoxelData(x-1,y,z).Inhabited()) ||
+            (y > 0 && GetVoxelData(x,y-1,z).Inhabited()) ||
+            (z > 0 && GetVoxelData(x,y,z-1).Inhabited()) ||
+            (x < Chunk::CHUNK_WIDTH*width && GetVoxelData(x+1,y,z).Inhabited()) ||
+            (y < Chunk::CHUNK_HEIGHT && GetVoxelData(x,y+1,z).Inhabited()) ||
+            (z < Chunk::CHUNK_LENGTH*length && GetVoxelData(x,y,z+1).Inhabited())
           )
         {
-        float max = std::min(sqrtf(distanceSQ) - radius, data.magnitude);
-        if(data.magnitude > max)
+        float min = std::min(sqrtf(distanceSQ) - radius, data.magnitude);
+        if(data.magnitude > min)
         {
-        float lastMag = data.magnitude > 0 ? 0 : data.magnitude;
+        float lastMag = !data.Inhabited() ? 0 : data.magnitude;
         data.magnitude += (sqrtf(distanceSQ) - radius) * 0.1f;
         Math::Clamp(&data.magnitude, -1.0f, 1.0f);
         // UpdateVoxel(x,y,z, data);
@@ -191,21 +191,21 @@ std::map<size_t, float> World::RemoveVoxels()
         Vec3<int> chunkPos = GetChunkPos(x,y,z);
 
         if(
-            (x > 0 && GetVoxelData(x-1,y,z).magnitude >= 0.0f) ||
-            (y > 0 && GetVoxelData(x,y-1,z).magnitude >= 0.0f) ||
-            (z > 0 && GetVoxelData(x,y,z-1).magnitude >= 0.0f) ||
-            (x < Chunk::CHUNK_WIDTH*width && GetVoxelData(x+1,y,z).magnitude >= 0.0f) ||
-            (y < Chunk::CHUNK_HEIGHT && GetVoxelData(x,y+1,z).magnitude >= 0.0f) ||
-            (z < Chunk::CHUNK_LENGTH*length && GetVoxelData(x,y,z+1).magnitude >= 0.0f)
+            (x > 0 && !GetVoxelData(x-1,y,z).Inhabited()) ||
+            (y > 0 && !GetVoxelData(x,y-1,z).Inhabited()) ||
+            (z > 0 && !GetVoxelData(x,y,z-1).Inhabited()) ||
+            (x < Chunk::CHUNK_WIDTH*width && !GetVoxelData(x+1,y,z).Inhabited()) ||
+            (y < Chunk::CHUNK_HEIGHT && !GetVoxelData(x,y+1,z).Inhabited()) ||
+            (z < Chunk::CHUNK_LENGTH*length && !GetVoxelData(x,y,z+1).Inhabited())
           )
         {
-        float lastMag = data.magnitude < 0.0f ? data.magnitude : 0.0f;
+        float lastMag = data.Inhabited() ? data.magnitude : 0.0f;
         float max = std::max(radius - sqrtf(distanceSQ), data.magnitude);
         if(data.magnitude < max)
         {
         data.magnitude += (radius - sqrtf(distanceSQ)) * 0.1f;
         Math::Clamp(&data.magnitude, -1.0f, 1.0f);
-        float mag = data.magnitude < 0.0f ? data.magnitude : 0.0f;
+        float mag = data.Inhabited() ? data.magnitude : 0.0f;
         if(lastMag - mag < 0.0f)
         {
           auto it = removed.find(data.voxel->id);
