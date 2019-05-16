@@ -51,9 +51,9 @@ void Chunk::Initialize(uint posX, uint posZ)
         float height = heightMap[indexHeight] * (CHUNK_HEIGHT+1);
         MCPointData& data = GetVoxelData(x,y,z);
 
-        data.magnitude = (height - y);
+        data.magnitude = (y - height);
         Math::Clamp(&data.magnitude, -1.0f, 1.0f);
-        data.magnitude = std::min(data.magnitude, (caves[index] - 0.48f) * 50.0f);
+        data.magnitude = std::max(data.magnitude, -(caves[index] - 0.48f) * 50.0f);
         Math::Clamp(&data.magnitude, -1.0f, 1.0f);
         data.voxel = &Voxel::stone;
 
@@ -89,7 +89,7 @@ void Chunk::Initialize(uint posX, uint posZ)
         for(int y = CHUNK_HEIGHT;y>=0;y--)
         {
           int index = GetVoxelIndex(x,y,z);
-          if(voxelData[index].magnitude >= 0.0f)
+          if(voxelData[index].magnitude < 0.0f)
           {
             voxelData[index].voxel = &Voxel::snow;
             break;

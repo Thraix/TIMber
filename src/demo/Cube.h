@@ -5,6 +5,7 @@
 #include <graphics/models/Material.h>
 #include <graphics/models/MeshFactory.h>
 #include <event/MouseEvent.h>
+#include <event/KeyEvent.h>
 #include <graphics/renderers/BatchRenderer.h>
 
 #include "../MCPointData.h"
@@ -14,6 +15,7 @@
 class Cube 
 {
   private:
+    bool showUi = true;
     size_t size;
     Greet::Mesh* mesh;
     Greet::Material material;
@@ -28,7 +30,7 @@ class Cube
 
   public:
     Cube(Greet::Camera& camera, size_t size)
-      : size{size}, material{Greet::Shader::FromFile("res/shaders/terrain.shader")}, 
+      : size{size}, material{Greet::Shader::FromFile("res/shaders/demo.shader")}, 
       shader2d{Greet::Shader::FromFile("res/shaders/2dshader.shader")},
       data{(size*size*size)},
       mcMesh(data, size, size, size), camera{camera}
@@ -81,21 +83,24 @@ class Cube
 
     void Render(const Greet::Camera& camera) const
     {
-      Greet::Vec4 color{1.0f,1.0f,1.0f,1.0f};
-      LineRenderer::GetInstance().DrawLine(camera, vertices[0],vertices[1], color);
-      LineRenderer::GetInstance().DrawLine(camera, vertices[2],vertices[3], color);
-      LineRenderer::GetInstance().DrawLine(camera, vertices[4],vertices[5], color);
-      LineRenderer::GetInstance().DrawLine(camera, vertices[6],vertices[7], color);
+      if(showUi)
+      {
+        Greet::Vec4 color{1.0f,1.0f,1.0f,1.0f};
+        LineRenderer::GetInstance().DrawLine(camera, vertices[0],vertices[1], color);
+        LineRenderer::GetInstance().DrawLine(camera, vertices[2],vertices[3], color);
+        LineRenderer::GetInstance().DrawLine(camera, vertices[4],vertices[5], color);
+        LineRenderer::GetInstance().DrawLine(camera, vertices[6],vertices[7], color);
 
-      LineRenderer::GetInstance().DrawLine(camera, vertices[0],vertices[2], color);
-      LineRenderer::GetInstance().DrawLine(camera, vertices[1],vertices[3], color);
-      LineRenderer::GetInstance().DrawLine(camera, vertices[4],vertices[6], color);
-      LineRenderer::GetInstance().DrawLine(camera, vertices[5],vertices[7], color);
+        LineRenderer::GetInstance().DrawLine(camera, vertices[0],vertices[2], color);
+        LineRenderer::GetInstance().DrawLine(camera, vertices[1],vertices[3], color);
+        LineRenderer::GetInstance().DrawLine(camera, vertices[4],vertices[6], color);
+        LineRenderer::GetInstance().DrawLine(camera, vertices[5],vertices[7], color);
 
-      LineRenderer::GetInstance().DrawLine(camera, vertices[0],vertices[4], color);
-      LineRenderer::GetInstance().DrawLine(camera, vertices[1],vertices[5], color);
-      LineRenderer::GetInstance().DrawLine(camera, vertices[2],vertices[6], color);
-      LineRenderer::GetInstance().DrawLine(camera, vertices[3],vertices[7], color);
+        LineRenderer::GetInstance().DrawLine(camera, vertices[0],vertices[4], color);
+        LineRenderer::GetInstance().DrawLine(camera, vertices[1],vertices[5], color);
+        LineRenderer::GetInstance().DrawLine(camera, vertices[2],vertices[6], color);
+        LineRenderer::GetInstance().DrawLine(camera, vertices[3],vertices[7], color);
+      }
 
       material.Bind(&camera);
       material.GetShader().SetUniform4f("mat_color", {1.0f,1.0f,1.0f,1.0f});
@@ -106,19 +111,22 @@ class Cube
       mcMesh.Unbind();
       material.Unbind();
 
-      shader2d.Enable();
-      shader2d.SetUniformMat3("pr_matrix", Greet::Mat3::Orthographic(0, Greet::Window::GetWidth(), 0, Greet::Window::GetHeight()));
-      renderer->Begin();
-      int i = 0;
-      for(auto&& renderable : renderables)
+      if(showUi)
       {
-        renderer->Submit(renderable);
-        renderer->SubmitString(std::to_string(i), renderable.m_position, Greet::FontManager::Get("roboto", 40),0xff000000);
-        i++;
+        shader2d.Enable();
+        shader2d.SetUniformMat3("pr_matrix", Greet::Mat3::Orthographic(0, Greet::Window::GetWidth(), 0, Greet::Window::GetHeight()));
+        renderer->Begin();
+        int i = 0;
+        for(auto&& renderable : renderables)
+        {
+          renderer->Submit(renderable);
+          //renderer->SubmitString(std::to_string(i), renderable.m_position, Greet::FontManager::Get("roboto", 40),0xff000000);
+          i++;
+        }
+        renderer->End();
+        renderer->Flush();
+        shader2d.Disable();
       }
-      renderer->End();
-      renderer->Flush();
-      shader2d.Disable();
     }
 
     void OnEvent(Greet::Event& event)
@@ -158,6 +166,12 @@ class Cube
             mcMesh.UpdateData(data, x,y,z,1,1,1);
           }
         }
+      }
+      else if(EVENT_IS_TYPE(event, Greet::EventType::KEY_PRESS))
+      {
+        Greet::KeyPressEvent& e = (Greet::KeyPressEvent&)event;
+        if(e.GetButton() == GLFW_KEY_F)
+          showUi = !showUi;
       }
     }
 

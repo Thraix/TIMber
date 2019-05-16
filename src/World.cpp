@@ -142,29 +142,29 @@ float World::PlaceVoxels(const Voxel& voxel, float amount)
         Vec3<int> chunkPos = GetChunkPos(x,y,z);
 
         if(
-            (x > 0 && GetVoxelData(x-1,y,z).magnitude >= 0.0f) ||
-            (y > 0 && GetVoxelData(x,y-1,z).magnitude >= 0.0f) ||
-            (z > 0 && GetVoxelData(x,y,z-1).magnitude >= 0.0f) ||
-            (x < Chunk::CHUNK_WIDTH*width && GetVoxelData(x+1,y,z).magnitude >= 0.0f) ||
-            (y < Chunk::CHUNK_HEIGHT && GetVoxelData(x,y+1,z).magnitude >= 0.0f) ||
-            (z < Chunk::CHUNK_LENGTH*length && GetVoxelData(x,y,z+1).magnitude >= 0.0f)
+            (x > 0 && GetVoxelData(x-1,y,z).magnitude < 0.0f) ||
+            (y > 0 && GetVoxelData(x,y-1,z).magnitude < 0.0f) ||
+            (z > 0 && GetVoxelData(x,y,z-1).magnitude < 0.0f) ||
+            (x < Chunk::CHUNK_WIDTH*width && GetVoxelData(x+1,y,z).magnitude < 0.0f) ||
+            (y < Chunk::CHUNK_HEIGHT && GetVoxelData(x,y+1,z).magnitude < 0.0f) ||
+            (z < Chunk::CHUNK_LENGTH*length && GetVoxelData(x,y,z+1).magnitude < 0.0f)
           )
         {
-        float max = std::max(radius - sqrtf(distanceSQ), data.magnitude);
-        if(data.magnitude < max)
+        float max = std::min(sqrtf(distanceSQ) - radius, data.magnitude);
+        if(data.magnitude > max)
         {
-        float lastMag = data.magnitude < 0 ? 0 : data.magnitude;
-        data.magnitude += (radius - sqrtf(distanceSQ)) * 0.1f;
+        float lastMag = data.magnitude > 0 ? 0 : data.magnitude;
+        data.magnitude += (sqrtf(distanceSQ) - radius) * 0.1f;
         Math::Clamp(&data.magnitude, -1.0f, 1.0f);
         // UpdateVoxel(x,y,z, data);
-        float voxelUsed = data.magnitude - lastMag;
+        float voxelUsed = lastMag - data.magnitude;
         if(voxelUsed > 0.0f)
         {
           data.voxel = &voxel;
           used += voxelUsed/3.0f;
           if(used > amount)
           {
-            data.magnitude -= used - amount;
+            data.magnitude += used - amount;
             used = amount;
           }
         }
@@ -191,28 +191,28 @@ std::map<size_t, float> World::RemoveVoxels()
         Vec3<int> chunkPos = GetChunkPos(x,y,z);
 
         if(
-            (x > 0 && GetVoxelData(x-1,y,z).magnitude < 0.0f) ||
-            (y > 0 && GetVoxelData(x,y-1,z).magnitude < 0.0f) ||
-            (z > 0 && GetVoxelData(x,y,z-1).magnitude < 0.0f) ||
-            (x < Chunk::CHUNK_WIDTH*width && GetVoxelData(x+1,y,z).magnitude < 0.0f) ||
-            (y < Chunk::CHUNK_HEIGHT && GetVoxelData(x,y+1,z).magnitude < 0.0f) ||
-            (z < Chunk::CHUNK_LENGTH*length && GetVoxelData(x,y,z+1).magnitude < 0.0f)
+            (x > 0 && GetVoxelData(x-1,y,z).magnitude >= 0.0f) ||
+            (y > 0 && GetVoxelData(x,y-1,z).magnitude >= 0.0f) ||
+            (z > 0 && GetVoxelData(x,y,z-1).magnitude >= 0.0f) ||
+            (x < Chunk::CHUNK_WIDTH*width && GetVoxelData(x+1,y,z).magnitude >= 0.0f) ||
+            (y < Chunk::CHUNK_HEIGHT && GetVoxelData(x,y+1,z).magnitude >= 0.0f) ||
+            (z < Chunk::CHUNK_LENGTH*length && GetVoxelData(x,y,z+1).magnitude >= 0.0f)
           )
         {
-        float lastMag = data.magnitude > 0.0f ? data.magnitude : 0.0f;
-        float min = std::min(sqrtf(distanceSQ) - radius, data.magnitude);
-        if(data.magnitude > min)
+        float lastMag = data.magnitude < 0.0f ? data.magnitude : 0.0f;
+        float max = std::max(radius - sqrtf(distanceSQ), data.magnitude);
+        if(data.magnitude < max)
         {
-        data.magnitude += (sqrtf(distanceSQ) - radius) * 0.1f;
+        data.magnitude += (radius - sqrtf(distanceSQ)) * 0.1f;
         Math::Clamp(&data.magnitude, -1.0f, 1.0f);
-        float mag = data.magnitude > 0.0f ? data.magnitude : 0.0f;
-        if(lastMag - mag > 0.0f)
+        float mag = data.magnitude < 0.0f ? data.magnitude : 0.0f;
+        if(lastMag - mag < 0.0f)
         {
           auto it = removed.find(data.voxel->id);
           if(it != removed.end())
-            it->second += (lastMag - mag) / 3.0f;
+            it->second += (mag - lastMag) / 3.0f;
           else
-            removed.emplace(data.voxel->id, (lastMag - mag) / 3.0f);
+            removed.emplace(data.voxel->id, (mag - lastMag) / 3.0f);
         }
 
         // UpdateVoxel(x,y,z, data);

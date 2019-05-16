@@ -37,6 +37,11 @@ class MCClassification
       return t * v1 + (1 - t) * v2;
     }
 
+    static const MCPointData& GetDataPoint(const std::vector<MCPointData>& data, uint x, uint y, uint z, uint width, uint height, uint length)
+    {
+        return data[x + y * width  + z * width * height];
+    }
+
     static std::vector<Greet::Vec3<size_t>> GetMarchingCubeFaces(const std::vector<MCPointData>& data, uint x, uint y, uint z, uint width, uint height, uint length)
     {
       byte classification = 0;
@@ -44,17 +49,18 @@ class MCClassification
       {
         classification >>= 1;
         const MCPointData& point = data[(x + (size_t)vertex.x) + (y + (size_t)vertex.y) * width  + (z + (size_t)vertex.z) * width * height];
-        if(point.magnitude < 0)
+        if(point.magnitude >= 0)
           classification |= 0x80; // 0b1000000
       }
+
       std::vector<Greet::Vec3<size_t>> faces = classifications[classification];
       std::vector<Greet::Vec3<size_t>> result;
       Greet::Vec3<float> offset{x,y,z};
       for(auto&& edges : faces)
       {
         result.push_back({
-            edges[1],
             edges[0],
+            edges[1],
             edges[2]
             });
       }

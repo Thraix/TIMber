@@ -142,10 +142,6 @@ void MCMesh::UpdateData(const std::vector<MCPointData>& data, int xOffset, int y
   }
 
   UpdateRenderData();
-#if 0
-  Log::Info("Vertex Count: ", vertices.size());
-  Log::Info("Face Count: ", faces.size());
-#endif
 }
 
 void MCMesh::Bind() const
@@ -176,6 +172,8 @@ void MCMesh::UpdateRenderData()
 
 void MCMesh::UpdateBuffer(Buffer& buffer, void* data, size_t size)
 {
+  if(size == 0 && buffer.GetDataSize() == 0)
+    return;
   buffer.Enable();
   if(buffer.GetDataSize() < size)
   {
@@ -214,7 +212,7 @@ const Vec4& MCMesh::GetColor(size_t edge, const Vec3<size_t>& voxel)
   Vec3<float> vMin = MCClassification::vertices[MCClassification::edges[edge].first];
   Vec3<float> vMax = MCClassification::vertices[MCClassification::edges[edge].second];
   uint indexMin = (vMin.x + voxel.x) + ((vMin.y + voxel.y) + (vMin.z + voxel.z) * height) * width;
-  if(voxelData[indexMin].magnitude >= 0.0f)
+  if(voxelData[indexMin].magnitude < 0.0f)
   {
     return voxelData[indexMin].voxel->color;
   }
