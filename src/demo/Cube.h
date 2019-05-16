@@ -120,13 +120,25 @@ class Cube
         for(auto&& renderable : renderables)
         {
           renderer->Submit(renderable);
-          //renderer->SubmitString(std::to_string(i), renderable.m_position, Greet::FontManager::Get("roboto", 40),0xff000000);
+          renderer->SubmitString(std::to_string(i), renderable.m_position+Greet::Vec2{0.0f,-10.0f}, Greet::FontManager::Get("roboto", 30),0xff000000);
           i++;
         }
         renderer->End();
         renderer->Flush();
         shader2d.Disable();
       }
+    }
+
+    void SetDataPoint(int index, float value)
+    {
+      int z = index / (4) + (size - 2) / 2;
+      int y = (index % 4) / 2 + (size - 2) / 2;
+      int x = (index % 2) + (size - 2) / 2;
+
+      MCPointData& point = data[x + (y + z * size) * size];
+
+      point.magnitude = point.magnitude / fabs(point.magnitude) * value;
+      mcMesh.UpdateData(data, x,y,z,1,1,1);
     }
 
     void OnEvent(Greet::Event& event)

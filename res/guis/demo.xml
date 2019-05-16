@@ -1,0 +1,159 @@
+<Frame
+  name="TopComponent"
+  width="200px" height="fill_parent"
+  resizeTop="false" resizeLeft="false" resizeBottom="false" resizeRight="true"
+  padding="10px" border="1px"
+  borderColor="#37474f" 
+  backgroundColor="#263238" 
+  >
+  <Label 
+    fontSize="18px" font="roboto" color="#90a4ae">Controls</Label>
+
+  <Divider name="divider" backgroundColor="#90a4ae"/>
+
+  <Label
+    padding="0"
+    fontSize="12px" font="roboto" color="#90a4ae">Point 0</Label>
+  <Slider
+    name="Slider0"
+    backgroundColor="#37474f" 
+    borderColor="#455a64" 
+    border="1px"
+    width="fill_parent" height="25px" margin="0"
+    minValue="0.1" maxValue="1" defaultValue="0.5" stepSize="0.1" indicatorInside="true">
+    <Component
+      borderColor="#263238" 
+      backgroundColor="#455a64" 
+      width="5px" height="fill_parent" margin="0px"
+      border="1px"
+      />
+  </Slider>
+
+  <Label
+    padding="0"
+    fontSize="12px" font="roboto" color="#90a4ae">Point 1</Label>
+  <Slider
+    name="Slider1"
+    backgroundColor="#37474f" 
+    borderColor="#455a64" 
+    border="1px"
+    width="fill_parent" height="25px" margin="0"
+    minValue="0.1" maxValue="1" defaultValue="0.5" stepSize="0.1" indicatorInside="true">
+    <Component
+      borderColor="#263238" 
+      backgroundColor="#455a64" 
+      width="5px" height="fill_parent" margin="0px"
+      border="1px"
+      />
+  </Slider>
+  <Label
+    padding="0"
+    fontSize="12px" font="roboto" color="#90a4ae">Point 2</Label>
+  <Slider
+    name="Slider2"
+    backgroundColor="#37474f" 
+    borderColor="#455a64" 
+    border="1px"
+    width="fill_parent" height="25px" margin="0"
+    minValue="0.1" maxValue="1" defaultValue="0.5" stepSize="0.1" indicatorInside="true">
+    <Component
+      borderColor="#263238" 
+      backgroundColor="#455a64" 
+      width="5px" height="fill_parent" margin="0px"
+      border="1px"
+      />
+  </Slider>
+  <Label
+    padding="0"
+    fontSize="12px" font="roboto" color="#90a4ae">Point 3</Label>
+  <Slider
+    name="Slider3"
+    backgroundColor="#37474f" 
+    borderColor="#455a64" 
+    border="1px"
+    width="fill_parent" height="25px" margin="0"
+    minValue="0.1" maxValue="1" defaultValue="0.5" stepSize="0.1" indicatorInside="true">
+    <Component
+      borderColor="#263238" 
+      backgroundColor="#455a64" 
+      width="5px" height="fill_parent" margin="0px"
+      border="1px"
+      />
+  </Slider>
+  <Label
+    padding="0"
+    fontSize="12px" font="roboto" color="#90a4ae">Point 4</Label>
+  <Slider
+    name="Slider4"
+    backgroundColor="#37474f" 
+    borderColor="#455a64" 
+    border="1px"
+    width="fill_parent" height="25px" margin="0"
+    minValue="0.1" maxValue="1" defaultValue="0.5" stepSize="0.1" indicatorInside="true">
+    <Component
+      borderColor="#263238" 
+      backgroundColor="#455a64" 
+      width="5px" height="fill_parent" margin="0px"
+      border="1px"
+      />
+  </Slider>
+  <Label
+    padding="0"
+    fontSize="12px" font="roboto" color="#90a4ae">Point 5</Label>
+  <Slider
+    name="Slider5"
+    backgroundColor="#37474f" 
+    borderColor="#455a64" 
+    border="1px"
+    width="fill_parent" height="25px" margin="0"
+    minValue="0.1" maxValue="1" defaultValue="0.5" stepSize="0.1" indicatorInside="true">
+    <Component
+      borderColor="#263238" 
+      backgroundColor="#455a64" 
+      width="5px" height="fill_parent" margin="0px"
+      border="1px"
+      />
+  </Slider>
+  <Label
+    padding="0"
+    fontSize="12px" font="roboto" color="#90a4ae">Point 6</Label>
+  <Slider
+    name="Slider6"
+    backgroundColor="#37474f" 
+    borderColor="#455a64" 
+    border="1px"
+    width="fill_parent" height="25px" margin="0"
+    minValue="0.1" maxValue="1" defaultValue="0.5" stepSize="0.1" indicatorInside="true">
+    <Component
+      borderColor="#263238" 
+      backgroundColor="#455a64" 
+      width="5px" height="fill_parent" margin="0px"
+      border="1px"
+      />
+  </Slider>
+  <Label
+    padding="0"
+    fontSize="12px" font="roboto" color="#90a4ae">Point 7</Label>
+  <Slider
+    name="Slider7"
+    backgroundColor="#37474f" 
+    borderColor="#455a64" 
+    border="1px"
+    width="fill_parent" height="25px" margin="0"
+    minValue="0.1" maxValue="1" defaultValue="0.5" stepSize="0.1" indicatorInside="true">
+    <Component
+      borderColor="#263238" 
+      backgroundColor="#455a64" 
+      width="5px" height="fill_parent" margin="0px"
+      border="1px"
+      />
+  </Slider>
+  <Button width="fill_parent" height="25" name="button"
+    backgroundColor="#37474f" borderColor="#455a64" 
+    hoverbackgroundColor="#37474f" hoverborderColor="#455a64" 
+    color="#90a4ae" fontSize="16px" font="roboto"
+    hoverborder="1px"
+    radius="8px" borderRadius="9px"
+    hoverradius="5px" hoverborderRadius="9px"
+    border="1px 1px 1px 1px">Reset</Button>
+</Frame>
