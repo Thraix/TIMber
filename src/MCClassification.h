@@ -17,7 +17,7 @@ class MCClassification
     {
       Greet::Vec3<float> v1 = vertices[edges[edge].first];
       Greet::Vec3<float> v2 = vertices[edges[edge].second];
-      return (v1 + v2) * 0.5f;
+      //return (v1 + v2) * 0.5f;
       MCPointData d1 = data[(x + v1.x) + ((y + v1.y) + (z + v1.z) * height) * width];
       MCPointData d2 = data[(x + v2.x) + ((y + v2.y) + (z + v2.z) * height) * width];
 
