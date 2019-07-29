@@ -74,7 +74,7 @@ class Cube
       {
         Greet::Vec3<float> projection = GetCubeScreenPos(i);
         renderables[i].m_position = {projection.x, projection.y};
-        Greet::Window::TransformMousePosToScreen(renderables[i].m_position);
+        Greet::Window::TransformScreenToWindowPos(renderables[i].m_position);
         renderables[i].m_position -= 10.0f;
       }
     }
@@ -151,10 +151,10 @@ class Cube
 
           for(int i = 0;i<vertices.size();i++)
           {
-            Greet::Vec3<float> projection = GetCubeScreenPos(i);
+            Greet::Vec3 projection = GetCubeScreenPos(i);
             Greet::Vec2 mousePos = e.GetPosition();
-            Greet::Window::TransformMousePosToScreen((Greet::Vec2&)projection);
-            Greet::Window::TransformMousePosToScreen(mousePos);
+            Greet::Window::TransformScreenToWindowPos((Greet::Vec2&)projection);
+            Greet::Window::TransformScreenToWindowPos(mousePos);
             if((mousePos - projection).LengthSQ() < 100)
             {
               if(!pressed || projection.z < point.second)
@@ -187,9 +187,7 @@ class Cube
 
     Greet::Vec3<float> GetCubeScreenPos(size_t index)
     {
-      Greet::Vec4 projection = camera.GetProjectionMatrix() * camera.GetViewMatrix() * vertices[index];
-      Greet::Vec3<float> pos = Greet::Vec3<float>{projection} / projection.w;
-      return pos;
+      return camera.GetWorldToScreenCoordinate(vertices[index]);
     }
 };
 

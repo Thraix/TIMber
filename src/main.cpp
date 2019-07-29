@@ -75,7 +75,7 @@ class Game : public App
       Renderable2D* noiseRenderable = new Renderable2D({0,0}, {512,512}, 0xffffffff, Sprite(TextureManager::Get2D("noiseMap")));
 #ifdef DEMO
       demo = new MarchingDemo();
-      RenderEngine::Add3DScene(demo);
+      RenderEngine::Add3DScene(demo, "demo");
       Window::SetBackgroundColor(Vec4(0.5f,0.5f,0.5f, 1.0f));
 #else 
 #ifndef TESTING
