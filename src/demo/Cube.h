@@ -35,9 +35,7 @@ class Cube
       data{(size*size*size)},
       mcMesh(data, size, size, size), camera{camera}
     {
-      Greet::MeshData* meshData = Greet::MeshFactory::Quad(0,0,0,1,1);
-      mesh = new Greet::Mesh(meshData);
-      delete meshData;
+      mesh = new Greet::Mesh(Greet::MeshFactory::Quad(0,0,0,1,1));
       renderer = new Greet::BatchRenderer();
 
       vertices = {

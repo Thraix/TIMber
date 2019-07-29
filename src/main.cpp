@@ -67,15 +67,15 @@ class Game : public App
       LineRenderer::CreateInstance();
       Loaders::LoadTextures("res/textures.json");
       FontManager::Add(new FontContainer("res/fonts/Roboto-Black.ttf","roboto"));
-      float* noiseMap = Noise::GenNoise(512, 512, 5, 128, 128, 0.75f);
-      BYTE* image = ImageUtils::CreateHeightmapImage(noiseMap, 512, 512);
+      std::vector<float> noiseMap = Noise::GenNoise(512, 512, 5, 128, 128, 0.75f);
+      std::vector<BYTE> image = ImageUtils::CreateHeightmapImage(noiseMap, 512, 512);
       TextureManager::Add("noiseMap", Texture2D(image, 512, 512));
 
       crossHair = new Renderable2D({0,0}, {20,20}, 0xffffffff, Sprite(TextureManager::Get2D("crosshair")));
       Renderable2D* noiseRenderable = new Renderable2D({0,0}, {512,512}, 0xffffffff, Sprite(TextureManager::Get2D("noiseMap")));
 #ifdef DEMO
       demo = new MarchingDemo();
-      RenderEngine::Add3DScene(demo, "3dscene");
+      RenderEngine::Add3DScene(demo);
       Window::SetBackgroundColor(Vec4(0.5f,0.5f,0.5f, 1.0f));
 #else 
 #ifndef TESTING
@@ -85,8 +85,8 @@ class Game : public App
 #endif
       layer = new CrossHairLayer(crossHair);
       // layer->Add(noiseRenderable);
-      RenderEngine::Add3DScene(world, "3dscene");
-      RenderEngine::Add2DScene(layer, "crosshair");
+      RenderEngine::Add3DScene(world, "world");
+      RenderEngine::Add2DScene(layer,"crosshair");
 #endif
     }
 

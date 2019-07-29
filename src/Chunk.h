@@ -27,8 +27,8 @@ class Chunk
     MCMesh* mesh;
     std::vector<MCPointData> voxelData;
     Greet::Mesh* originalMesh;
-    float* heightMap;
-    float* biome;
+    std::vector<float> heightMap;
+    std::vector<float> biome;
     uint posX;
     uint posZ;
   private:

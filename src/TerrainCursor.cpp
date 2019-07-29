@@ -8,11 +8,8 @@ using namespace Greet;
 TerrainCursor::TerrainCursor()
   : material{Greet::Shader::FromFile("res/shaders/cursor.shader")}//, TextureManager::Get2D("terrainCursor")}
 {
-  //MeshData* data = MeshFactory::Quad(0,0,0,1,1);
-  MeshData* data = MeshFactory::Sphere({0.0f},1.0f, 20, 20);
-
-  mesh = new Mesh(data);
-  delete data;
+  //MeshData data = MeshFactory::Quad(0,0,0,1,1);
+  mesh = new Mesh(MeshFactory::Sphere({0.0f},1.0f, 20, 20));
 }
 
 TerrainCursor::~TerrainCursor()

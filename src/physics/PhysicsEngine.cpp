@@ -8,14 +8,10 @@ using namespace Greet;
 PhysicsEngine::PhysicsEngine()
   : material{Greet::Shader::FromFile("res/shaders/3dshader.shader")}
 {
-  MeshData* data = MeshFactory::Sphere({}, 1.0f, 20, 20);
-  sphereMesh = new Mesh(data);
+  sphereMesh = new Mesh(MeshFactory::Sphere({}, 1.0f, 20, 20));
   sphereMesh->SetEnableCulling(false);
-  delete data;
-  data = Greet::MeshFactory::Quad(0.0f,0.0f,0.0f,60.0f,60.0f);
-  planeMesh = new Mesh(data);
+  planeMesh = new Mesh(Greet::MeshFactory::Quad(0.0f,0.0f,0.0f,60.0f,60.0f));
   planeMesh->SetEnableCulling(false);
-  delete data;
 }
 #else
 PhysicsEngine::PhysicsEngine()
