@@ -1,6 +1,5 @@
 #pragma once
 
-#include <graphics/models/TPCamera.h>
 #include <graphics/renderers/BatchRenderer3D.h>
 #include "PlayerCamera.h"
 #include "Inventory.h"

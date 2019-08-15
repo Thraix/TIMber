@@ -1,7 +1,6 @@
 #pragma once
 
 #include <graphics/models/Mesh.h>
-#include <graphics/models/TPCamera.h>
 #include <utils/Noise.h>
 #include "MCMesh.h"
 #include "RayCast.h"

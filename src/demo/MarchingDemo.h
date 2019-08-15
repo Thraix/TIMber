@@ -4,7 +4,7 @@
 
 #include <graphics/layers/Scene.h>
 #include <graphics/RenderEngine.h>
-#include <graphics/models/TPCamera.h>
+#include <graphics/cameras/TPCamera.h>
 #include <event/MouseEvent.h>
 #include <event/KeyEvent.h>
 #include <graphics/gui/GUIScene.h>

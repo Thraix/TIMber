@@ -3,7 +3,6 @@
 #include "RayCast.h"
 
 #include <graphics/models/MeshFactory.h> 
-#include <graphics/models/TPCamera.h> 
 #include <algorithm>
 
 using namespace Greet;

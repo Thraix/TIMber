@@ -7,7 +7,6 @@
 #include <internal/GreetTypes.h>
 #include <graphics/layers/Scene.h>
 #include <graphics/models/EntityModel.h>
-#include <graphics/models/TPCamera.h>
 #include <graphics/Window.h>
 #include <graphics/Skybox.h>
 #include <graphics/textures/TextureManager.h>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <graphics/models/Camera.h>
+#include <graphics/cameras/Camera.h>
 
 class PlayerCamera : public Greet::Camera
 {
