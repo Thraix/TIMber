@@ -36,6 +36,7 @@ void PlayerCamera::Update(float timeElapsed)
 
 void PlayerCamera::OnEvent(Event& event)
 {
+  Camera::OnEvent(event);
   if(EVENT_IS_TYPE(event, EventType::MOUSE_MOVE))
   {
     float sens = 40.0f;

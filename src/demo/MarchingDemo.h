@@ -25,7 +25,7 @@ class MarchingDemo : public Greet::Scene
     Greet::GUIScene* guiScene;
   public:
     MarchingDemo()
-      : camera{Greet::Mat4::ProjectionMatrix(Greet::Window::GetAspect(), 90, 0.01f, 1000.0f)},
+      : camera{90, 0.01f, 1000.0f},
       cube1{camera, 2},
       cube2{camera, 4}
     {

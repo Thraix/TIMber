@@ -40,7 +40,7 @@ class TestWorld : public Greet::Scene
     TestWorld()
       : skybox{Greet::TextureManager::Get3D("skybox")}, 
       material{Greet::Shader::FromFile("res/shaders/terrain.shader")},
-      camera{Greet::Mat4::ProjectionMatrix(Greet::Window::GetAspect(), 90, 0.001f, 100.0f),{0.0f, 0.0f, 10.0f}, 0.0f,0.0f},
+      camera{90, 0.001f, 100.0f,{0.0f, 0.0f, 10.0f}, 0.0f,0.0f},
       plane{{0.0f, -0.0f, 0.0f}, {2.0f, 1.0f, 0.0f}}, 
       plane2{{0.0f, -10.0f, 0.0f}, {0.0f, 1.0f, 0.0f}}, 
       plane3{{25.0f, -10.0f, 0.0f}, {-2.0f, 1.0f, 0.0f}}, 
