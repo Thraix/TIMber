@@ -3,7 +3,7 @@
 #include <functional>
 
 #include <graphics/layers/Scene.h>
-#include <graphics/RenderEngine.h>
+#include <graphics/GlobalSceneManager.h>
 #include <graphics/cameras/TPCamera.h>
 #include <event/MouseEvent.h>
 #include <event/KeyEvent.h>
@@ -31,7 +31,7 @@ class MarchingDemo : public Greet::Scene
     {
       guiScene = new Greet::GUIScene(new Greet::GUIRenderer(), Greet::Shader::FromFile("res/shaders/gui.shader"));
       guiScene->AddFrame(Greet::FrameFactory::GetFrame("res/guis/demo.xml"));
-      Greet::RenderEngine::Add2DScene(guiScene, "gui");
+      Greet::GlobalSceneManager::GetSceneManager().Add2DScene(guiScene, "gui");
       Greet::Frame* frame = guiScene->GetFrame("TopComponent");
       using namespace std::placeholders;
       frame->GetComponentByName<Greet::Slider>("Slider0")

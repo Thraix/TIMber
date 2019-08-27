@@ -14,7 +14,7 @@ PlayerCamera Player::CreateCamera()
 Player::Player(World* world, const Greet::Vec3<float>& position)
   : invScene{inventory}, camera{CreateCamera()}, position{position}, world{world}
 {
-  RenderEngine::Add2DScene(&invScene, "inventory");
+  GlobalSceneManager::GetSceneManager().Add2DScene(&invScene, "inventory");
 }
 
 void Player::OnWorldInit()

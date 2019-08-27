@@ -85,8 +85,8 @@ class Game : public App
 #endif
       layer = new CrossHairLayer(crossHair);
       // layer->Add(noiseRenderable);
-      RenderEngine::Add3DScene(world, "world");
-      RenderEngine::Add2DScene(layer,"crosshair");
+      GlobalSceneManager::GetSceneManager().Add3DScene(world, "world");
+      GlobalSceneManager::GetSceneManager().Add2DScene(layer,"crosshair");
 #endif
     }
 
