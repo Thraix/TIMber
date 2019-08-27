@@ -6,7 +6,7 @@
 #include "LineRenderer.h"
 
 //#define TESTING
-//#define DEMO
+#define DEMO
 
 using namespace Greet;
 class CrossHairLayer : public Layer
@@ -73,10 +73,9 @@ class Game : public App
 
       crossHair = new Renderable2D({0,0}, {20,20}, 0xffffffff, Sprite(TextureManager::Get2D("crosshair")));
       Renderable2D* noiseRenderable = new Renderable2D({0,0}, {512,512}, 0xffffffff, Sprite(TextureManager::Get2D("noiseMap")));
+      RenderCommand::SetClearColor(Vec4(0.1f,0.1f,0.1f, 1.0f));
 #ifdef DEMO
       demo = new MarchingDemo();
-      RenderEngine::Add3DScene(demo, "demo");
-      Window::SetBackgroundColor(Vec4(0.5f,0.5f,0.5f, 1.0f));
 #else 
 #ifndef TESTING
       world = new World(3, 3);

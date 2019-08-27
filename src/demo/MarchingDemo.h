@@ -10,6 +10,7 @@
 #include <graphics/gui/GUIScene.h>
 #include <graphics/gui/ComponentFactory.h>
 #include <graphics/gui/Frame.h>
+#include <graphics/gui/Viewport.h>
 #include <graphics/gui/Slider.h>
 #include <graphics/gui/Button.h>
 
@@ -33,6 +34,7 @@ class MarchingDemo : public Greet::Scene
       guiScene->AddFrame(Greet::FrameFactory::GetFrame("res/guis/demo.xml"));
       Greet::GlobalSceneManager::GetSceneManager().Add2DScene(guiScene, "gui");
       Greet::Frame* frame = guiScene->GetFrame("TopComponent");
+      Greet::Viewport* viewport = frame->GetComponentByName<Greet::Viewport>("demoViewport");
       using namespace std::placeholders;
       frame->GetComponentByName<Greet::Slider>("Slider0")
         ->SetOnValueChangeCallback(std::bind(&MarchingDemo::OnSliderChange, std::ref(*this), _1, _2, _3, 0));
@@ -52,7 +54,8 @@ class MarchingDemo : public Greet::Scene
         ->SetOnValueChangeCallback(std::bind(&MarchingDemo::OnSliderChange, std::ref(*this), _1, _2, _3, 7));
       frame->GetComponentByName<Greet::Button>("button")
         ->SetOnClickCallback(std::bind(&MarchingDemo::OnReset, std::ref(*this), _1));
-      }
+      viewport->GetSceneManager().Add3DScene(this, "demo");
+    }
 
     virtual ~MarchingDemo()
     {
