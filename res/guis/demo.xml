@@ -7,7 +7,7 @@
   backgroundColor="#263238" 
   verticalAlign="false"
   >
-<Container width="200">
+<Container width="500">
   <Label 
     fontSize="18" font="roboto" color="#90a4ae">Controls</Label>
 
@@ -159,5 +159,5 @@
     hoverradius="5" hoverborderRadius="9"
     border="1 1 1 1">Reset</Button>
 </Container>
-<Viewport name="demoViewport" width="fill_parent" height="fill_parent" backgroundColor="#808080"/>
+<SceneView name="demoScene" width="fill_parent" height="fill_parent" backgroundColor="#808080"/>
 </Frame>

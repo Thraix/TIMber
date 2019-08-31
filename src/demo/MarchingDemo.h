@@ -10,7 +10,7 @@
 #include <graphics/gui/GUIScene.h>
 #include <graphics/gui/ComponentFactory.h>
 #include <graphics/gui/Frame.h>
-#include <graphics/gui/Viewport.h>
+#include <graphics/gui/SceneView.h>
 #include <graphics/gui/Slider.h>
 #include <graphics/gui/Button.h>
 
@@ -34,7 +34,6 @@ class MarchingDemo : public Greet::Scene
       guiScene->AddFrame(Greet::FrameFactory::GetFrame("res/guis/demo.xml"));
       Greet::GlobalSceneManager::GetSceneManager().Add2DScene(guiScene, "gui");
       Greet::Frame* frame = guiScene->GetFrame("TopComponent");
-      Greet::Viewport* viewport = frame->GetComponentByName<Greet::Viewport>("demoViewport");
       using namespace std::placeholders;
       frame->GetComponentByName<Greet::Slider>("Slider0")
         ->SetOnValueChangeCallback(std::bind(&MarchingDemo::OnSliderChange, std::ref(*this), _1, _2, _3, 0));
@@ -54,7 +53,7 @@ class MarchingDemo : public Greet::Scene
         ->SetOnValueChangeCallback(std::bind(&MarchingDemo::OnSliderChange, std::ref(*this), _1, _2, _3, 7));
       frame->GetComponentByName<Greet::Button>("button")
         ->SetOnClickCallback(std::bind(&MarchingDemo::OnReset, std::ref(*this), _1));
-      viewport->GetSceneManager().Add3DScene(this, "demo");
+      frame->GetComponentByName<Greet::SceneView>("demoScene")->GetSceneManager().Add3DScene(this, "demo");
     }
 
     virtual ~MarchingDemo()
@@ -79,7 +78,7 @@ class MarchingDemo : public Greet::Scene
       cube2.SetDataPoint(index, newValue);
     }
 
-    void Render() const
+    void Render() const override
     {
       if(fill)
         cube1.Render(camera);
@@ -87,15 +86,16 @@ class MarchingDemo : public Greet::Scene
         cube2.Render(camera);
     }
 
-    void Update(float timeElapsed)
+    void Update(float timeElapsed) override
     {
       camera.Update(timeElapsed);
       cube1.Update(timeElapsed);
       cube2.Update(timeElapsed);
     }
 
-    void OnEvent(Greet::Event& event)
+    void OnEvent(Greet::Event& event) override
     {
+      Scene::OnEvent(event);
       if(EVENT_IS_TYPE(event, Greet::EventType::KEY_PRESS))
       {
         Greet::KeyPressEvent& e = (Greet::KeyPressEvent&)event;
@@ -118,9 +118,9 @@ class MarchingDemo : public Greet::Scene
       cube2.OnEvent(event);
     }
 
-    void WindowResize(Greet::WindowResizeEvent& event) 
+    void ViewportResize(Greet::ViewportResizeEvent& event) override
     {
-      camera.SetProjectionMatrix(Greet::Mat4::ProjectionMatrix(90, event.GetWidth() / (float)event.GetHeight(), 0.01f, 1000.0f));
+      camera.ViewportResize(event);
     }
 };
 

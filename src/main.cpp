@@ -6,7 +6,7 @@
 #include "LineRenderer.h"
 
 //#define TESTING
-#define DEMO
+//#define DEMO
 
 using namespace Greet;
 class CrossHairLayer : public Layer
@@ -14,15 +14,15 @@ class CrossHairLayer : public Layer
   Renderable2D* crossHair;
   public:
     CrossHairLayer(Renderable2D* crossHair)
-      : Layer{new BatchRenderer(), ShaderFactory::DefaultShader(), Mat3::Orthographic(0,Window::GetWidth(), 0.0f, Window::GetHeight())}, crossHair{crossHair}
+      : Layer{new BatchRenderer(), ShaderFactory::DefaultShader(), Mat3::OrthographicViewport()}, crossHair{crossHair}
     {
       Add(crossHair);
       crossHair->SetPosition(Vec2((Window::GetWidth() - crossHair->GetSize().w) * 0.5f, (Window::GetHeight() - crossHair->GetSize().h)* 0.5f));
     }
 
-    void WindowResize(WindowResizeEvent& event) override
+    void ViewportResize(ViewportResizeEvent& event) override
     {
-      SetProjectionMatrix(Mat3::Orthographic(0,event.GetWidth(), 0, event.GetHeight()));
+      SetProjectionMatrix(Mat3::OrthographicViewport());
       crossHair->SetPosition(Vec2((event.GetWidth() - crossHair->GetSize().w) * 0.5f, (event.GetHeight() - crossHair->GetSize().h)* 0.5f));
     }
 };

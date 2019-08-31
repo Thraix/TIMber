@@ -72,10 +72,7 @@ class Cube
     {
       for(int i = 0;i<vertices.size();i++)
       {
-        Greet::Vec3<float> projection = GetCubeScreenPos(i);
-        renderables[i].m_position = {projection.x, projection.y};
-        Greet::Window::TransformScreenToWindowPos(renderables[i].m_position);
-        renderables[i].m_position -= 10.0f;
+        renderables[i].m_position = ~Greet::Mat3::OrthographicViewport() * Greet::Vec2(GetCubeScreenPos(i)) - 10.0f;
       }
     }
 
@@ -112,7 +109,7 @@ class Cube
       if(showUi)
       {
         shader2d.Enable();
-        shader2d.SetUniformMat3("pr_matrix", Greet::Mat3::Orthographic(0, Greet::Window::GetWidth(), 0, Greet::Window::GetHeight()));
+        shader2d.SetUniformMat3("pr_matrix", Greet::Mat3::OrthographicViewport());
         renderer->Begin();
         int i = 0;
         for(auto&& renderable : renderables)
@@ -149,13 +146,12 @@ class Cube
           std::pair<size_t, float> point;
           bool pressed = false;
 
+          Greet::Mat3 invProjectionMatrix = ~Greet::Mat3::OrthographicViewport();
           for(int i = 0;i<vertices.size();i++)
           {
-            Greet::Vec3 projection = GetCubeScreenPos(i);
-            Greet::Vec2 mousePos = e.GetPosition();
-            Greet::Window::TransformScreenToWindowPos((Greet::Vec2&)projection);
-            Greet::Window::TransformScreenToWindowPos(mousePos);
-            if((mousePos - projection).LengthSQ() < 100)
+            Greet::Vec3<float> projection = invProjectionMatrix * GetCubeScreenPos(i);
+            Greet::Vec2 mousePos = invProjectionMatrix * e.GetPosition() - 10.0f;
+            if((mousePos - renderables[i].m_position).LengthSQ() < 100)
             {
               if(!pressed || projection.z < point.second)
                 point = {i, projection.z};

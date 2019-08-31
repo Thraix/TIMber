@@ -16,7 +16,7 @@ class InventoryScene : public Greet::Layer
 
   public:
     InventoryScene(const Inventory& inventory)
-      : Layer{new Greet::BatchRenderer(), Greet::ShaderFactory::DefaultShader(), Greet::Mat3::Orthographic(0,Greet::Window::GetWidth(), 0, Greet::Window::GetHeight())}, inventory{inventory}, renderable{{10.0f,0},{64,64},0xffffffff, {Greet::TextureManager::Get2D("material")}}, selected{{10.0f,0},{64,64},0xffffffff, {Greet::TextureManager::Get2D("selected_material")}} 
+      : Layer{new Greet::BatchRenderer(), Greet::ShaderFactory::DefaultShader(), Greet::Mat3::OrthographicViewport()}, inventory{inventory}, renderable{{10.0f,0},{64,64},0xffffffff, {Greet::TextureManager::Get2D("material")}}, selected{{10.0f,0},{64,64},0xffffffff, {Greet::TextureManager::Get2D("selected_material")}} 
     {
 
     }
@@ -50,9 +50,9 @@ class InventoryScene : public Greet::Layer
       }
     }
 
-    void WindowResize(Greet::WindowResizeEvent& event) override
+    void ViewportResize(Greet::ViewportResizeEvent& event) override
     {
-      SetProjectionMatrix(Greet::Mat3::Orthographic(0, event.GetWidth(), 0, event.GetHeight()));
+      SetProjectionMatrix(Greet::Mat3::OrthographicViewport());
     }
 
 };

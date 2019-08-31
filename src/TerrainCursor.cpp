@@ -21,12 +21,8 @@ void TerrainCursor::Render(const Camera& camera, const IntersectionData& interse
 {
   Mat4 screenToWorld = ~(camera.GetProjectionMatrix() * camera.GetViewMatrix());
 
-  Vec4 nearRes = screenToWorld * Vec3<float>(0.0f, 0.0f, -1.0);
-  Vec4 farRes = screenToWorld * Vec3<float>(0.0f, 0.0f, 1.0);
-
-  // Normalize the w
-  Vec3<float> near = Vec3<float>(nearRes) / nearRes.w;
-  Vec3<float> far = Vec3<float>(farRes) / farRes.w;
+  Vec3<float> nearRes = screenToWorld * Vec3<float>(0.0f, 0.0f, -1.0);
+  Vec3<float> farRes = screenToWorld * Vec3<float>(0.0f, 0.0f, 1.0);
 
   material.Bind(&camera);
   Vec3<float> normal = (intersection.v2 - intersection.v1).Cross(intersection.v3 - intersection.v1).Normalize();

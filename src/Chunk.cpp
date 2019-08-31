@@ -140,12 +140,8 @@ IntersectionData Chunk::RayCastChunk(const Camera& camera)
 {
   Mat4 screenToModel = ~(camera.GetProjectionMatrix() * camera.GetViewMatrix() * GetTransformationMatrix());
 
-  Vec4 nearRes = screenToModel * Vec3<float>(0.0f, 0.0f, -1.0);
-  Vec4 farRes = screenToModel * Vec3<float>(0.0f, 0.0f, 1.0);
-
-  // Normalize the w
-  Vec3<float> near = Vec3<float>(nearRes) / nearRes.w;
-  Vec3<float> far = Vec3<float>(farRes) / farRes.w;
+  Vec3<float> near = screenToModel * Vec3<float>(0.0f, 0.0f, -1.0);
+  Vec3<float> far = screenToModel * Vec3<float>(0.0f, 0.0f, 1.0);
 
   if(RayCast::CheckCube(near,far, {0,0,0}, {CHUNK_WIDTH+1, CHUNK_HEIGHT+1, CHUNK_LENGTH+1}))
   {
