@@ -2,7 +2,7 @@
 
 #include "MCPointData.h"
 
-#include <internal/GreetTypes.h>
+#include <common/Types.h>
 #include <graphics/buffers/Buffer.h>
 #include <graphics/buffers/VertexArray.h>
 #include <math/Vec3.h>

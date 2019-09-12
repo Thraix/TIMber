@@ -2,7 +2,7 @@
 
 #include "Voxels.h"
 
-#include <internal/GreetTypes.h>
+#include <common/Types.h>
 
 struct MCPointData
 {

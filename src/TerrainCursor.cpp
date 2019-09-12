@@ -27,10 +27,10 @@ void TerrainCursor::Render(const Camera& camera, const IntersectionData& interse
   material.Bind(&camera);
   Vec3<float> normal = (intersection.v2 - intersection.v1).Cross(intersection.v3 - intersection.v1).Normalize();
   Vec3<float> center = intersection.intersectionPoint;
-  //material.GetShader().SetUniformMat4("transformationMatrix", Mat4::AlignAxis(center, near-far, {0.0f, 1.0f, 0.0f}) * Mat4::Scale({2.0f}));
-  material.GetShader().SetUniformMat4("transformationMatrix", Mat4::Translate(center) * Mat4::Scale({0.5f}));
-  material.GetShader().SetUniform4f("mat_color", {1.0f, 1.0f, 1.0f, 0.3f});
-  material.GetShader().SetUniform1f("time", time);
+  //material.GetShader()->SetUniformMat4("transformationMatrix", Mat4::AlignAxis(center, near-far, {0.0f, 1.0f, 0.0f}) * Mat4::Scale({2.0f}));
+  material.GetShader()->SetUniformMat4("transformationMatrix", Mat4::Translate(center) * Mat4::Scale({0.5f}));
+  material.GetShader()->SetUniform4f("mat_color", {1.0f, 1.0f, 1.0f, 0.3f});
+  material.GetShader()->SetUniform1f("time", time);
 
   mesh->Bind();
   mesh->Render();

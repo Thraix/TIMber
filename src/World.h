@@ -4,7 +4,7 @@
 #include "Player.h"
 #include "TerrainCursor.h"
 
-#include <internal/GreetTypes.h>
+#include <common/Types.h>
 #include <graphics/layers/Scene.h>
 #include <graphics/models/EntityModel.h>
 #include <graphics/Window.h>

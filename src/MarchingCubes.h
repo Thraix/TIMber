@@ -1,6 +1,6 @@
 #pragma once
 
-#include <internal/GreetTypes.h>
+#include <common/Types.h>
 #include <graphics/models/Mesh.h>
 #include <graphics/models/MeshFactory.h>
 #include "HalfEdgeMesh.h"

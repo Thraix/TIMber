@@ -142,12 +142,12 @@ void PhysicsEngine::Render(const Camera& camera) const
 {
   i++;
   material.Bind(&camera);
-  material.GetShader().SetUniform4f("mat_color", Vec4{1.0f, 0.0f, 0.0f, 1.0f});
+  material.GetShader()->SetUniform4f("mat_color", Vec4{1.0f, 0.0f, 0.0f, 1.0f});
   for(auto&& body : bodies)
   {
     if(body->GetType() == CollisionType::Sphere)
     {
-      material.GetShader().SetUniformMat4("transformationMatrix", Mat4::Translate(body->GetPosition()) * Mat4::Scale({((PhysicsSphereBody*)body)->GetRadius()}));
+      material.GetShader()->SetUniformMat4("transformationMatrix", Mat4::Translate(body->GetPosition()) * Mat4::Scale({((PhysicsSphereBody*)body)->GetRadius()}));
       sphereMesh->Bind();
       sphereMesh->Render();
       sphereMesh->Unbind();
@@ -155,7 +155,7 @@ void PhysicsEngine::Render(const Camera& camera) const
     else if(body->GetType() == CollisionType::Plane)
     {
       PhysicsPlaneBody* plane = (PhysicsPlaneBody*)body;
-      material.GetShader().SetUniformMat4("transformationMatrix", Mat4::Translate(body->GetPosition()) * Mat4::RotateRX(atan2(plane->GetNormal().z, plane->GetNormal().y)) * Mat4::RotateRZ(-atan2(plane->GetNormal().x, plane->GetNormal().y)));
+      material.GetShader()->SetUniformMat4("transformationMatrix", Mat4::Translate(body->GetPosition()) * Mat4::RotateRX(atan2(plane->GetNormal().z, plane->GetNormal().y)) * Mat4::RotateRZ(-atan2(plane->GetNormal().x, plane->GetNormal().y)));
       planeMesh->Bind();
       planeMesh->Render();
       planeMesh->Unbind();

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <internal/GreetTypes.h>
+#include <common/Types.h>
 #include <math/Vec3.h>
 #include <graphics/models/MeshData.h>
 #include <map>

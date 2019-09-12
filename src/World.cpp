@@ -31,7 +31,7 @@ void World::Render() const
   {
     for(int x = 0;x < width; x++)
     {
-      terrainMaterial.GetShader().SetUniformMat4("transformationMatrix", chunks[x + z * width].GetTransformationMatrix());
+      terrainMaterial.GetShader()->SetUniformMat4("transformationMatrix", chunks[x + z * width].GetTransformationMatrix());
       MCMesh* mesh = chunks[x + z * width].mesh;
       mesh->Bind();
       mesh->Render();

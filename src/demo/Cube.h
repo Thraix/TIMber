@@ -19,7 +19,7 @@ class Cube
     size_t size;
     Greet::Mesh* mesh;
     Greet::Material material;
-    Greet::Shader shader2d;
+    Greet::Ref<Greet::Shader> shader2d;
     std::vector<MCPointData> data;
     MCMesh mcMesh;
     std::vector<Greet::Vec3<float>> vertices;
@@ -52,15 +52,15 @@ class Cube
       {
         renderables.push_back(Greet::Renderable2D{{-10.0f},{20.0f},0xff000000, Greet::Sprite(Greet::TextureManager::Get2D("select"))});
       }
-      shader2d.Enable();
+      shader2d->Enable();
       GLint texIDs[32];
       for (int i = 0; i < 32; i++)
       {
         texIDs[i] = i;
       }
-      shader2d.Enable();
-      shader2d.SetUniform1iv("textures", 32, texIDs);
-      shader2d.Disable();
+      shader2d->Enable();
+      shader2d->SetUniform1iv("textures", 32, texIDs);
+      shader2d->Disable();
     }
 
     virtual ~Cube()
@@ -98,8 +98,8 @@ class Cube
       }
 
       material.Bind(&camera);
-      material.GetShader().SetUniform4f("mat_color", {1.0f,1.0f,1.0f,1.0f});
-      material.GetShader().SetUniformMat4("transformationMatrix", Greet::Mat4::Translate({-0.5f - (size - 2) * 0.5f}));
+      material.GetShader()->SetUniform4f("mat_color", {1.0f,1.0f,1.0f,1.0f});
+      material.GetShader()->SetUniformMat4("transformationMatrix", Greet::Mat4::Translate({-0.5f - (size - 2) * 0.5f}));
       mcMesh.Bind();
       GLCall(glDisable(GL_CULL_FACE));
       mcMesh.Render();
@@ -108,8 +108,8 @@ class Cube
 
       if(showUi)
       {
-        shader2d.Enable();
-        shader2d.SetUniformMat3("pr_matrix", Greet::Mat3::OrthographicViewport());
+        shader2d->Enable();
+        shader2d->SetUniformMat3("pr_matrix", Greet::Mat3::OrthographicViewport());
         renderer->Begin();
         int i = 0;
         for(auto&& renderable : renderables)
@@ -120,7 +120,7 @@ class Cube
         }
         renderer->End();
         renderer->Flush();
-        shader2d.Disable();
+        shader2d->Disable();
       }
     }
 

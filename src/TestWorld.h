@@ -131,7 +131,7 @@ class TestWorld : public Greet::Scene
 #endif
 
       material.Bind(&camera);
-      material.GetShader().SetUniformMat4("transformationMatrix", Greet::Mat4::Identity());
+      material.GetShader()->SetUniformMat4("transformationMatrix", Greet::Mat4::Identity());
       GLCall(glDisable(GL_CULL_FACE));
       mesh->Bind();
       mesh->Render();

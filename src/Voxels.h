@@ -1,6 +1,6 @@
 #pragma once
 
-#include <internal/GreetTypes.h>
+#include <common/Types.h>
 #include <utils/json/JSONLoader.h>
 #include <graphics/gui/GUIUtils.h>
 #include <math/Vec4.h>

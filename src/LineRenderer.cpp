@@ -22,10 +22,10 @@ LineRenderer::LineRenderer()
 
 void LineRenderer::DrawLine(const Camera& camera, const Vec3<float>& p1, const Vec3<float>& p2, const Vec4& color) const
 {
-  shader.Enable();
-  shader.SetUniformMat4("projectionMatrix", camera.GetProjectionMatrix());
-  shader.SetUniformMat4("viewMatrix", camera.GetViewMatrix());
-  shader.SetUniform4f("lineColor", color);
+  shader->Enable();
+  shader->SetUniformMat4("projectionMatrix", camera.GetProjectionMatrix());
+  shader->SetUniformMat4("viewMatrix", camera.GetViewMatrix());
+  shader->SetUniform4f("lineColor", color);
   GLCall(glLineWidth(5.0f));
 
   vbo.Enable();
@@ -41,5 +41,5 @@ void LineRenderer::DrawLine(const Camera& camera, const Vec3<float>& p1, const V
   ibo.Disable();
   vao.Disable();
 
-  shader.Disable();
+  shader->Disable();
 }
