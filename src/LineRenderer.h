@@ -7,9 +7,9 @@ class LineRenderer
   private:
     static LineRenderer* renderer;
     Greet::Ref<Greet::Shader> shader;
-    Greet::VertexArray vao;
-    Greet::Buffer vbo;
-    Greet::Buffer ibo;
+    Greet::Ref<Greet::VertexArray> vao;
+    Greet::Ref<Greet::Buffer> vbo;
+    Greet::Ref<Greet::Buffer> ibo;
 
   private:
     LineRenderer();

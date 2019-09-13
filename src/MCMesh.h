@@ -34,10 +34,10 @@ class MCMesh
 {
   private:
     // Rendering data
-    Greet::Buffer vbo_position;
-    Greet::Buffer vbo_color;
-    Greet::VertexArray vao;
-    Greet::Buffer ibo;
+    Greet::Ref<Greet::Buffer> vbo_position;
+    Greet::Ref<Greet::Buffer> vbo_color;
+    Greet::Ref<Greet::VertexArray> vao;
+    Greet::Ref<Greet::Buffer> ibo;
 
     // Voxel data
     std::vector<MCPointData> voxelData;
@@ -59,7 +59,7 @@ class MCMesh
 
     void UpdateRenderData();
     void UpdateData(const std::vector<MCPointData>& data, int xOffset, int yOffset, int zOffset, uint w, uint h, uint l);
-    void UpdateBuffer(Greet::Buffer& buffer, void* data, size_t size);
+    void UpdateBuffer(const Greet::Ref<Greet::Buffer>& buffer, void* data, size_t size);
 
     void Bind() const;
     void Render() const;
