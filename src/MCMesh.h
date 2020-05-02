@@ -34,8 +34,8 @@ class MCMesh
 {
   private:
     // Rendering data
-    Greet::Ref<Greet::Buffer> vbo_position;
-    Greet::Ref<Greet::Buffer> vbo_color;
+    Greet::Ref<Greet::VertexBuffer> vbo_position;
+    Greet::Ref<Greet::VertexBuffer> vbo_color;
     Greet::Ref<Greet::VertexArray> vao;
     Greet::Ref<Greet::Buffer> ibo;
 

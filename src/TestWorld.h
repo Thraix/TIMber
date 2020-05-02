@@ -1,5 +1,6 @@
 #pragma once
 
+#include <internal/GreetGL.h>
 #include <graphics/layers/Scene.h>
 #include <event/MouseEvent.h>
 #include <event/KeyEvent.h>
@@ -38,14 +39,14 @@ class TestWorld : public Greet::Scene
 
   public:
     TestWorld()
-      : skybox{Greet::TextureManager::Get3D("skybox")}, 
+      : skybox{Greet::TextureManager::LoadCubeMap("res/textures/skybox.meta")},
       material{Greet::Shader::FromFile("res/shaders/terrain.shader")},
       camera{90, 0.001f, 100.0f,{0.0f, 0.0f, 10.0f}, 0.0f,0.0f},
-      plane{{0.0f, -0.0f, 0.0f}, {2.0f, 1.0f, 0.0f}}, 
-      plane2{{0.0f, -10.0f, 0.0f}, {0.0f, 1.0f, 0.0f}}, 
-      plane3{{25.0f, -10.0f, 0.0f}, {-2.0f, 1.0f, 0.0f}}, 
-      plane4{{0.0f, 0.0f, 20.0f}, {0.0f, 0.0f,-1.0f}}, 
-      plane5{{0.0f, 0.0f, -20.0f}, {0.0f, 0.0f,1.0f}}, 
+      plane{{0.0f, -0.0f, 0.0f}, {2.0f, 1.0f, 0.0f}},
+      plane2{{0.0f, -10.0f, 0.0f}, {0.0f, 1.0f, 0.0f}},
+      plane3{{25.0f, -10.0f, 0.0f}, {-2.0f, 1.0f, 0.0f}},
+      plane4{{0.0f, 0.0f, 20.0f}, {0.0f, 0.0f,-1.0f}},
+      plane5{{0.0f, 0.0f, -20.0f}, {0.0f, 0.0f,1.0f}},
       sphere{{1.0f, 10.0f, 0.0f}, 1.0f, 1.0f},
       sphere2{{0.0f, 15.0f, 0.0f},8.0f, 2.0f},
       sphere3{{0.2f, 19.0f, 0.0f},1.0f, 1.0f}
@@ -62,10 +63,10 @@ class TestWorld : public Greet::Scene
       {
         for(int x = 4;x<7;x++)
         {
-          SetDataPoint({&Voxel::grass, 0.2}, x,2,z);  
+          SetDataPoint({&Voxel::grass, 0.2}, x,2,z);
         }
       }
-          SetDataPoint({&Voxel::grass, 0.5}, 5,2,5);  
+          SetDataPoint({&Voxel::grass, 0.5}, 5,2,5);
       mesh = new MCMesh(data, size, size, size);
       Greet::Window::GrabMouse(true);
 

@@ -17,7 +17,7 @@ class World : public Greet::Scene
   Player player;
 
   Greet::Material terrainMaterial;
-  const Greet::Texture2D& noiseTexture;
+  Greet::Ref<Greet::Texture2D> noiseTexture;
   uint width;
   uint length;
   Chunk* chunks;

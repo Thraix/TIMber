@@ -2,6 +2,7 @@
 
 #include <functional>
 
+#include <input/InputDefines.h>
 #include <graphics/layers/Scene.h>
 #include <graphics/GlobalSceneManager.h>
 #include <graphics/cameras/TPCamera.h>
@@ -30,7 +31,7 @@ class MarchingDemo : public Greet::Scene
       cube1{camera, 2},
       cube2{camera, 4}
     {
-      guiScene = new Greet::GUIScene(new Greet::GUIRenderer(), Greet::Shader::FromFile("res/shaders/gui.shader"));
+      guiScene = new Greet::GUIScene(new Greet::GUIRenderer());
       guiScene->AddFrame(Greet::FrameFactory::GetFrame("res/guis/demo.xml"));
       Greet::GlobalSceneManager::GetSceneManager().Add2DScene(guiScene, "gui");
       Greet::Frame* frame = guiScene->GetFrame("TopComponent");
@@ -99,7 +100,7 @@ class MarchingDemo : public Greet::Scene
       if(EVENT_IS_TYPE(event, Greet::EventType::KEY_PRESS))
       {
         Greet::KeyPressEvent& e = (Greet::KeyPressEvent&)event;
-        if(e.GetButton() == GLFW_KEY_E)
+        if(e.GetButton() == GREET_KEY_E)
         {
           fill = !fill;
         }
@@ -107,7 +108,7 @@ class MarchingDemo : public Greet::Scene
       if(EVENT_IS_TYPE(event, Greet::EventType::MOUSE_PRESS))
       {
         Greet::MousePressEvent& e = (Greet::MousePressEvent&)event;
-        if(e.GetButton() == GLFW_MOUSE_BUTTON_3)
+        if(e.GetButton() == GREET_MOUSE_3)
           camera.OnEvent(event);
       }
       else

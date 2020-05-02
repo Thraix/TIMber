@@ -14,7 +14,7 @@ class CrossHairLayer : public Layer
   Renderable2D* crossHair;
   public:
     CrossHairLayer(Renderable2D* crossHair)
-      : Layer{new BatchRenderer(), ShaderFactory::DefaultShader(), Mat3::OrthographicViewport()}, crossHair{crossHair}
+      : Layer{new BatchRenderer(ShaderFactory::Shader2D()), Mat3::OrthographicViewport()}, crossHair{crossHair}
     {
       Add(crossHair);
       crossHair->SetPosition(Vec2((Window::GetWidth() - crossHair->GetSize().w) * 0.5f, (Window::GetHeight() - crossHair->GetSize().h)* 0.5f));
@@ -65,18 +65,17 @@ class Game : public App
     void Init()
     {
       LineRenderer::CreateInstance();
-      Loaders::LoadTextures("res/textures.json");
       FontManager::Add(new FontContainer("res/fonts/Roboto-Black.ttf","roboto"));
       std::vector<float> noiseMap = Noise::GenNoise(512, 512, 5, 128, 128, 0.75f);
       std::vector<BYTE> image = ImageUtils::CreateHeightmapImage(noiseMap, 512, 512);
-      TextureManager::Add("noiseMap", Texture2D(image, 512, 512));
+      TextureManager::AddTexture2D("noiseMap", Texture2D::Create(image, 512, 512));
 
-      crossHair = new Renderable2D({0,0}, {20,20}, 0xffffffff, Sprite(TextureManager::Get2D("crosshair")));
-      Renderable2D* noiseRenderable = new Renderable2D({0,0}, {512,512}, 0xffffffff, Sprite(TextureManager::Get2D("noiseMap")));
+      crossHair = new Renderable2D({0,0}, {20,20}, 0xffffffff, Sprite(TextureManager::LoadTexture2D("res/textures/crosshair.meta")));
+      Renderable2D* noiseRenderable = new Renderable2D({0,0}, {512,512}, 0xffffffff, Sprite(TextureManager::LoadTexture2D("noiseMap")));
       RenderCommand::SetClearColor(Vec4(0.1f,0.1f,0.1f, 1.0f));
 #ifdef DEMO
       demo = new MarchingDemo();
-#else 
+#else
 #ifndef TESTING
       world = new World(3, 3);
 #else
@@ -99,7 +98,7 @@ class Game : public App
 
     }
 
-    void Render() 
+    void Render()
     {
 
     }

@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include <internal/GreetGL.h>
+
 #include "MCClassification.h"
 
 using namespace Greet;
@@ -9,10 +11,10 @@ using namespace Greet;
 MCMesh::MCMesh(const std::vector<MCPointData>& data, uint width, uint height, uint length)
   : voxelData{data}, width{width}, height{height}, length{length}
 {
-  vao = VertexArray::CreateVertexArray();
-  vbo_position = Buffer::CreateBuffer(0, BufferType::ARRAY, BufferDrawType::DYNAMIC);
-  vbo_color = Buffer::CreateBuffer(0, BufferType::ARRAY, BufferDrawType::DYNAMIC);
-  ibo = Buffer::CreateBuffer(0, BufferType::INDEX, BufferDrawType::DYNAMIC);
+  vao = VertexArray::Create();
+  vbo_position = VertexBuffer::CreateDynamic(nullptr, 0);
+  vbo_color = VertexBuffer::CreateDynamic(nullptr, 0);
+  ibo = Buffer::Create(0, BufferType::INDEX, BufferDrawType::DYNAMIC);
   // Go through all the cubes
   Vec3<size_t> voxel = {0, 0, 0};
   for(uint z = 0;z<length-1;z++)
@@ -41,14 +43,14 @@ MCMesh::MCMesh(const std::vector<MCPointData>& data, uint width, uint height, ui
   vao->Enable();
   vbo_position->Enable();
   vbo_position->UpdateData(vertices.data(), vertices.size() * sizeof(Vec3<float>));
-  GLCall(glEnableVertexAttribArray(0));
-  GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0));
+  vbo_position->SetStructure({{0, BufferAttributeType::VEC3}});
+  vao->AddVertexBuffer(vbo_position);
   vbo_position->Disable();
 
   vbo_color->Enable();
   vbo_color->UpdateData(colors.data(), colors.size() * sizeof(Vec4));
-  GLCall(glEnableVertexAttribArray(1));
-  GLCall(glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0));
+  vbo_color->SetStructure({{1, BufferAttributeType::VEC4}});
+  vao->AddVertexBuffer(vbo_color);
   vbo_color->Disable();
 
   ibo->Enable();

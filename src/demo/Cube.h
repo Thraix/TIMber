@@ -1,5 +1,7 @@
 #pragma once
 
+#include <internal/GreetGL.h>
+#include <input/InputDefines.h>
 #include <graphics/fonts/FontManager.h>
 #include <graphics/models/Mesh.h>
 #include <graphics/models/Material.h>
@@ -12,7 +14,7 @@
 #include "../MCMesh.h"
 #include "../LineRenderer.h"
 
-class Cube 
+class Cube
 {
   private:
     bool showUi = true;
@@ -36,7 +38,7 @@ class Cube
       mcMesh(data, size, size, size), camera{camera}
     {
       mesh = new Greet::Mesh(Greet::MeshFactory::Quad(0,0,0,1,1));
-      renderer = new Greet::BatchRenderer();
+      renderer = new Greet::BatchRenderer(shader2d);
 
       vertices = {
         {-0.5f,-0.5f,-0.5f},
@@ -50,17 +52,8 @@ class Cube
       };
       for(int i = 0;i<8;i++)
       {
-        renderables.push_back(Greet::Renderable2D{{-10.0f},{20.0f},0xff000000, Greet::Sprite(Greet::TextureManager::Get2D("select"))});
+        renderables.push_back(Greet::Renderable2D{{-10.0f},{20.0f},0xff000000, Greet::Sprite(Greet::TextureManager::LoadTexture2D("res/textures/select.meta"))});
       }
-      shader2d->Enable();
-      GLint texIDs[32];
-      for (int i = 0; i < 32; i++)
-      {
-        texIDs[i] = i;
-      }
-      shader2d->Enable();
-      shader2d->SetUniform1iv("textures", 32, texIDs);
-      shader2d->Disable();
     }
 
     virtual ~Cube()
@@ -157,7 +150,7 @@ class Cube
                 point = {i, projection.z};
               pressed = true;
             }
-          } 
+          }
           if(pressed)
           {
             int x = ceil(vertices[point.first].x) + (size - 2) / 2;
@@ -176,7 +169,7 @@ class Cube
       else if(EVENT_IS_TYPE(event, Greet::EventType::KEY_PRESS))
       {
         Greet::KeyPressEvent& e = (Greet::KeyPressEvent&)event;
-        if(e.GetButton() == GLFW_KEY_F)
+        if(e.GetButton() == GREET_KEY_F)
           showUi = !showUi;
       }
     }

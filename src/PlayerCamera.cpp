@@ -1,8 +1,9 @@
 #include "PlayerCamera.h"
 
-#include <event/MouseEvent.h>
 #include <event/KeyEvent.h>
+#include <event/MouseEvent.h>
 #include <graphics/Window.h>
+#include <input/InputDefines.h>
 
 using namespace Greet;
 
@@ -48,21 +49,21 @@ void PlayerCamera::OnEvent(Event& event)
   else if(EVENT_IS_TYPE(event, EventType::KEY_PRESS))
   {
     KeyPressEvent& e = (KeyPressEvent&)event;
-    if(e.GetButton() == GLFW_KEY_W) movement.forward = true;
-    else if(e.GetButton() == GLFW_KEY_A) movement.left = true;
-    else if(e.GetButton() == GLFW_KEY_S) movement.backward = true;
-    else if(e.GetButton() == GLFW_KEY_D) movement.right = true;
-    else if(e.GetButton() == GLFW_KEY_SPACE) movement.up = true;
-    else if(e.GetButton() == GLFW_KEY_LEFT_SHIFT) movement.down = true;
+    if(e.GetButton() == GREET_KEY_W) movement.forward = true;
+    else if(e.GetButton() == GREET_KEY_A) movement.left = true;
+    else if(e.GetButton() == GREET_KEY_S) movement.backward = true;
+    else if(e.GetButton() == GREET_KEY_D) movement.right = true;
+    else if(e.GetButton() == GREET_KEY_SPACE) movement.up = true;
+    else if(e.GetButton() == GREET_KEY_LEFT_SHIFT) movement.down = true;
   }
   else if(EVENT_IS_TYPE(event, EventType::KEY_RELEASE))
   {
     KeyReleaseEvent& e = (KeyReleaseEvent&)event;
-    if(e.GetButton() == GLFW_KEY_W) movement.forward = false;
-    else if(e.GetButton() == GLFW_KEY_A) movement.left = false;
-    else if(e.GetButton() == GLFW_KEY_S) movement.backward = false;
-    else if(e.GetButton() == GLFW_KEY_D) movement.right = false;
-    else if(e.GetButton() == GLFW_KEY_SPACE) movement.up = false;
-    else if(e.GetButton() == GLFW_KEY_LEFT_SHIFT) movement.down = false;
+    if(e.GetButton() == GREET_KEY_W) movement.forward = false;
+    else if(e.GetButton() == GREET_KEY_A) movement.left = false;
+    else if(e.GetButton() == GREET_KEY_S) movement.backward = false;
+    else if(e.GetButton() == GREET_KEY_D) movement.right = false;
+    else if(e.GetButton() == GREET_KEY_SPACE) movement.up = false;
+    else if(e.GetButton() == GREET_KEY_LEFT_SHIFT) movement.down = false;
   }
 }

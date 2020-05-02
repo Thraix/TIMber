@@ -21,8 +21,8 @@ class PlayerCamera : public Greet::Camera
     Greet::Vec3<float> velocity;
     Movement movement;
   public:
-    PlayerCamera(float fov, float near, float far, const Greet::Vec3<float>& position, float pitch, float yaw) 
-      : Camera{fov, near, far}, position{position}, rotation{pitch, yaw, 0}, 
+    PlayerCamera(float fov, float near, float far, const Greet::Vec3<float>& position, float pitch, float yaw)
+      : Camera{fov, near, far}, position{position}, rotation{pitch, yaw, 0},
       viewMatrix{Greet::Mat4::ViewMatrix(position, rotation)} {}
 
     virtual const Greet::Mat4& GetViewMatrix() const { return viewMatrix; }

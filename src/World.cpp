@@ -6,8 +6,8 @@ using namespace Greet;
 
 World::World(uint width, uint length)
   : player{this, {width * Chunk::CHUNK_WIDTH / 2.0f, Chunk::CHUNK_HEIGHT, length * Chunk::CHUNK_LENGTH/ 2.0f}},
-  skybox{Greet::TextureManager::Get3D("skybox")},
-  width{width}, length{length}, terrainMaterial{Greet::Shader::FromFile("res/shaders/terrain.shader")}, noiseTexture{TextureManager::Get2D("noiseMap")}
+  skybox{Greet::TextureManager::LoadCubeMap("res/textures/skybox.meta")},
+  width{width}, length{length}, terrainMaterial{Greet::Shader::FromFile("res/shaders/terrain.shader")}, noiseTexture{TextureManager::LoadTexture2D("noiseMap")}
 {
   chunks = new Chunk[width * length];
   for(int z = 0;z < length; z++)
@@ -16,17 +16,17 @@ World::World(uint width, uint length)
     {
       chunks[x+z*width].Initialize(x,z);
       Log::Info("Initialized ", x+z*width+1, "/", width*length, " chunks");
-    } 
+    }
   }
   player.OnWorldInit();
 }
 
-void World::Render() const 
+void World::Render() const
 {
   skybox.Render(player.GetCamera());
 
   terrainMaterial.Bind(&player.GetCamera());
-  noiseTexture.Enable();
+  noiseTexture->Enable();
   for(int z = 0;z < length; z++)
   {
     for(int x = 0;x < width; x++)
@@ -44,7 +44,7 @@ void World::Render() const
 #endif
     }
   }
-  noiseTexture.Disable();
+  noiseTexture->Disable();
   terrainMaterial.Unbind();
   player.Render();
 
@@ -59,7 +59,7 @@ void World::Render() const
   }
 }
 
-void World::Update(float timeElapsed) 
+void World::Update(float timeElapsed)
 {
   player.Update(timeElapsed);
   Vec3<float> pos = player.GetPosition();
@@ -81,7 +81,7 @@ void World::Update(float timeElapsed)
       {
         if(!chunkIntersection.hasIntersection || data.distanceFromNear < chunkIntersection.distanceFromNear)
           chunkIntersection = data;
-      } 
+      }
     }
   }
   if(chunkIntersection.distanceFromNear > player.GetReach())
@@ -94,10 +94,10 @@ void World::Update(float timeElapsed)
 
     }
   }
-  cursor.Update(timeElapsed); 
+  cursor.Update(timeElapsed);
 }
 
-void World::OnEvent(Greet::Event& event) 
+void World::OnEvent(Greet::Event& event)
 {
   Scene::OnEvent(event);
   player.OnEvent(event);

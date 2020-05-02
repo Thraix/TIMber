@@ -16,7 +16,7 @@ class InventoryScene : public Greet::Layer
 
   public:
     InventoryScene(const Inventory& inventory)
-      : Layer{new Greet::BatchRenderer(), Greet::ShaderFactory::DefaultShader(), Greet::Mat3::OrthographicViewport()}, inventory{inventory}, renderable{{10.0f,0},{64,64},0xffffffff, {Greet::TextureManager::Get2D("material")}}, selected{{10.0f,0},{64,64},0xffffffff, {Greet::TextureManager::Get2D("selected_material")}} 
+      : Layer{new Greet::BatchRenderer(Greet::ShaderFactory::Shader2D()), Greet::Mat3::OrthographicViewport()}, inventory{inventory}, renderable{{10.0f,0},{64,64},0xffffffff, {Greet::TextureManager::LoadTexture2D("res/textures/material.meta")}}, selected{{10.0f,0},{64,64},0xffffffff, {Greet::TextureManager::LoadTexture2D("res/textures/selected_material.meta")}}
     {
 
     }
@@ -25,7 +25,7 @@ class InventoryScene : public Greet::Layer
     {
       Greet::Renderable2D renderableCpy = renderable;
       Greet::Renderable2D selectedCpy = selected;
-      Greet::BatchRenderer* renderer = (Greet::BatchRenderer*)m_renderer; 
+      Greet::BatchRenderer* batchRenderer = (Greet::BatchRenderer*)renderer;
       size_t size = inventory.GetInventorySize();
       float height = (size * 70.0f) - 6.0f;
       for(int i = 0;i<size;i++)
@@ -46,7 +46,7 @@ class InventoryScene : public Greet::Layer
           selectedCpy.m_position = renderableCpy.m_position;
           renderer->Submit(selectedCpy);
         }
-        renderer->SubmitString(amountStr, {10.0f + 32 - font->GetWidthOfText(amountStr)* 0.5f, yPos + 60.0f}, font, 0xffffffff);
+        batchRenderer->SubmitString(amountStr, {10.0f + 32 - font->GetWidthOfText(amountStr)* 0.5f, yPos + 60.0f}, font, 0xffffffff);
       }
     }
 

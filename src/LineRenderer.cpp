@@ -1,5 +1,7 @@
 #include "LineRenderer.h"
 
+#include <internal/GreetGL.h>
+
 using namespace Greet;
 
 LineRenderer* LineRenderer::renderer = nullptr;
@@ -7,17 +9,13 @@ LineRenderer* LineRenderer::renderer = nullptr;
 LineRenderer::LineRenderer()
   : shader(Shader::FromFile("res/shaders/line.shader"))
 {
-  vao = VertexArray::CreateVertexArray();
-  vao->Enable();
-  vbo = Buffer::CreateBuffer(2 * sizeof(Vec3<float>), BufferType::ARRAY, BufferDrawType::DYNAMIC);
-  vbo->Enable();
-  vbo->UpdateData(nullptr);
-  GLCall(glEnableVertexAttribArray(0));
-  GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vec3<float>), 0));
+  vao = VertexArray::Create();
+  vbo = VertexBuffer::CreateDynamic(nullptr, 2 * sizeof(Vec3<float>));
+  vbo->SetStructure({{0, BufferAttributeType::VEC4}});
   vbo->Disable();
   vao->Disable();
   uint indices[2] = {0, 1};
-  ibo = Buffer::CreateBuffer(2 * sizeof(uint), BufferType::INDEX, BufferDrawType::STATIC);
+  ibo = Buffer::Create(2 * sizeof(uint), BufferType::INDEX, BufferDrawType::STATIC);
   ibo->Enable();
   ibo->UpdateData(indices);
   ibo->Disable();
