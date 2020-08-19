@@ -4,6 +4,7 @@
 
 #include <graphics/models/MeshFactory.h> 
 #include <algorithm>
+#include <cassert>
 
 using namespace Greet;
 
