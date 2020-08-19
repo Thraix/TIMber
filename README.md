@@ -1,5 +1,5 @@
-# Voxel RayTracer
-This was done as a project for the course [TSKB07](http://computer-graphics.se/TSBK03/) at Linköping University. The project is a voxel raytracer implemented in a GLSL shader. 
+# Dynamic Terrain using Marching Cubes
+This was done as a project for the course [TSKB07](http://computer-graphics.se/TSBK07/) at Linköping University. The project is an implementation of dynamic terrain using marching cubes. 
 
 ## Dependencies 
 To run the project a OpenGL shader version of 4.5 is required. If this version is not met, nothing will be shown on screen and error messages will be printed. 
@@ -17,11 +17,11 @@ Not entirely sure if these work anymore, was a long time since I used Ubuntu. Bu
 ```
 
 ## Running
-To compile and run the application you need to also download my [engine](https://github.com/Thraix/Greet-Engine-Port) (verified to work on engine commit `26da0106fa6172faa74c5ccb562ee654d8656f1c`) and place it in the same directory as this project (ie `~/Documents/VoxelRayTracer` and `~/Documents/Greet-Engine-Port`) then if you use [MakeGen](https://github.com/Thraix/MakeGen) simply run
+To compile and run the application you need to also download my [engine](https://github.com/Thraix/Greet-Engine-Port) (verified to work on engine commit `26da0106fa6172faa74c5ccb562ee654d8656f1c`) and place it in the same directory as this project (ie `~/Documents/TIMber` and `~/Documents/Greet-Engine-Port`) then if you use [MakeGen](https://github.com/Thraix/MakeGen) simply run
 ```
 makegen run
 ```
-in the `VoxelRayTracer` directory to run the program.
+in the `TIMber` directory to run the program.
 
 Otherwise, you first need to build the engine inside `Greet-Engine-Port/Greet-core` by running
 ```
@@ -31,26 +31,16 @@ then compiling and running the project with
 ```
 make run
 ```
-in the `VoxelRayTracer` directory.
+in the `TIMber` directory.
 
 ## Using the raytracer
-Controlling the raytracer is done with WASD for moving the camera. To rotate the camera you use the arrow keys. To move up and down use the spacebar and left shift respectivly.
+The controls for the game is pretty straight forward. Move player with WASD, move up and down with space and shift. Move the camera with the mouse. To change which material you are placing down scroll the mouse wheel. To place out voxels in the terrain hold down the right mouse button when aiming on the terrain (this will only work within 20 units or when a striped sphere appears on the terrain). To remove voxels hold down the left mouse button.
 
-Other controls are listed in the GUI of the application.
-
-Sometimes when using the GUI the 3D-scene loses its focus, therefore sometimes the input stops working for the application. This is solved by simply pressing the viewport of the 3D-scene.
-
-## Modifying the RayTracer
-The shader is located in res/shaders/voxel.glsl. This contains both the fragment shader and the vertex shader. To render the scene with only colors simply remove the comment of the `#define _COLOR_ONLY`.
-
-In order to change the voxels in the scen you have to modify the src/main.cpp file. There are defines for different scenes located at the top of the file, including `_GLAS_CUBE`, `_TERRAIN` and `_REFRACTION`. There is also a `_HIGH_PERFORMANCE` flag which will render the scene in a framebuffer with size 400x400. This also forces the use of 16x16 size textures, as opposed to 128x128 texture which are used by default.
+In order to toggle the grabbing of the mouse simply press escape.
 
 ## Screenshots
-### Reflection
-![Reflection](readme-data/reflection.png)
+### Sculpting 
+![Reflection](readme-data/sculpting.png)
 
-### Refraction
-![Refraction](readme-data/refraction-cube.png)
-
-### Terrain Scene 
-![Terrain Scene](readme-data/scene.png)
+### Caves 
+![Cave](readme-data/cave.png)
