@@ -32,17 +32,17 @@ void PlayerCamera::Update(float timeElapsed)
   velocity.y = yVel;
   velocity.z = vel.y;
   position += velocity * timeElapsed;
-  viewMatrix = Mat4::ViewMatrix(position, rotation);
+  SetViewMatrix(Mat4::ViewMatrix(position, rotation));
 }
 
 void PlayerCamera::OnEvent(Event& event)
 {
-  Camera::OnEvent(event);
+  Camera3D::OnEvent(event);
   if(EVENT_IS_TYPE(event, EventType::MOUSE_MOVE))
   {
-    float sens = 40.0f;
+    float sens = 0.75f;
     MouseMoveEvent& e = (MouseMoveEvent&)event;
-    Vec2 delta = e.GetDeltaPosition() * Vec2(Window::GetAspect(), 1);
+    Vec2 delta = e.GetDeltaPosition() * Vec2f(Window::GetAspect(), 1);
     rotation.x -= delta.y * sens;
     rotation.y += delta.x * sens;
   }

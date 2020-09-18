@@ -2,8 +2,9 @@
 
 #include "RayCast.h"
 #include <graphics/models/EntityModel.h>
+#include <graphics/cameras/Camera3D.h>
 
-class TerrainCursor 
+class TerrainCursor
 {
   private:
     Greet::Material material;
@@ -12,7 +13,7 @@ class TerrainCursor
   public:
     TerrainCursor();
     virtual ~TerrainCursor();
-    void Render(const Greet::Camera& camera, const IntersectionData& intersection) const;
+    void Render(const Greet::Ref<Greet::Camera3D>& camera, const IntersectionData& intersection) const;
     void Update(float timeElapsed);
 };
 

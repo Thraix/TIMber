@@ -8,15 +8,15 @@ out vec4 vert_color;
 out vec2 uv;
 out vec3 vert_pos;
 
-uniform vec4 mat_color = vec4(1,1,1,1);
-uniform mat4 transformationMatrix;
-uniform mat4 projectionMatrix;
-uniform mat4 viewMatrix;
+uniform vec4 uMaterialColor = vec4(1,1,1,1);
+uniform mat4 uTransformationMatrix;
+uniform mat4 uProjectionMatrix;
+uniform mat4 uViewMatrix;
 
 void main()
 {
-  gl_Position = projectionMatrix * viewMatrix * transformationMatrix * vec4(position, 1.0f);
-  vert_color = mat_color ;
+  gl_Position = uProjectionMatrix * uViewMatrix * uTransformationMatrix * vec4(position, 1.0f);
+  vert_color = uMaterialColor;
   vert_pos = position;
   uv = 0.5f - position.xz;
 }
@@ -31,7 +31,7 @@ in vec2 uv;
 out vec4 out_color;
 
 uniform sampler2D tex;
-uniform float time;
+uniform float uTime;
 
 void main()
 {

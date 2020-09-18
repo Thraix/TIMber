@@ -26,11 +26,11 @@ struct Face
   uint v3;
 
   Face(uint v1,uint v2,uint v3)
-    : v1{v1}, v2{v2}, v3{v3} 
+    : v1{v1}, v2{v2}, v3{v3}
   {}
 };
 
-class MCMesh 
+class MCMesh
 {
   private:
     // Rendering data
@@ -45,8 +45,8 @@ class MCMesh
 
     // Render data
     std::vector<Greet::Vec3<float>> vertices;
-    std::vector<Greet::Vec4> colors;
-    std::vector<Face> faces; 
+    std::vector<Greet::Color> colors;
+    std::vector<Face> faces;
 
     // Keep track of unique vertices with their correspondig vertex index
     std::map<uint, uint> uniqueVertices;
@@ -55,7 +55,7 @@ class MCMesh
     std::queue<Fragmentation> fragmentVertices;
     std::queue<Fragmentation> fragmentFaces;
   public:
-    MCMesh(const std::vector<MCPointData>& data, uint width, uint height, uint length); 
+    MCMesh(const std::vector<MCPointData>& data, uint width, uint height, uint length);
 
     void UpdateRenderData();
     void UpdateData(const std::vector<MCPointData>& data, int xOffset, int yOffset, int zOffset, uint w, uint h, uint l);
@@ -65,12 +65,12 @@ class MCMesh
     void Render() const;
     void Unbind() const;
 
-    const std::vector<Face>& GetFaces() const { return faces; } 
-    const std::vector<Greet::Vec3<float>>& GetVertices() const { return vertices; } 
+    const std::vector<Face>& GetFaces() const { return faces; }
+    const std::vector<Greet::Vec3<float>>& GetVertices() const { return vertices; }
   private:
     ushort GetVoxelEdges(std::vector<Greet::Vec3<size_t>> faces);
     ushort GetVoxelEdges(std::vector<std::pair<size_t, Greet::Vec3<size_t>>> faces);
-    const Greet::Vec4& GetColor(size_t edge, const Greet::Vec3<size_t>& voxel);
+    const Greet::Color& GetColor(size_t edge, const Greet::Vec3<size_t>& voxel);
     uint AddFace(const Greet::Vec3<size_t>& edges, const Greet::Vec3<size_t>& voxel);
     void RemoveFace(uint face);
     uint AddVertex(size_t edge, const Greet::Vec3<size_t>& voxel);

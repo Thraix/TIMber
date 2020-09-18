@@ -6,12 +6,12 @@ layout(location = 0) in vec3 position;
 out vec4 vert_color;
 
 uniform vec4 lineColor = vec4(1,1,1,1);
-uniform mat4 projectionMatrix;
-uniform mat4 viewMatrix;
+uniform mat4 uProjectionMatrix;
+uniform mat4 uViewMatrix;
 
 void main()
 {
-	gl_Position = projectionMatrix * viewMatrix * vec4(position, 1.0f);
+	gl_Position = uProjectionMatrix * uViewMatrix * vec4(position, 1.0f);
 	vert_color = lineColor;
 }
 

@@ -13,11 +13,13 @@ out vec3 toLightVector;
 out vec3 toCameraVector;
 out float visibility;
 
-uniform mat4 transformationMatrix;
-uniform mat4 projectionMatrix;
-uniform mat4 viewMatrix;
-uniform vec3 light_position = vec3(0.0, 0.0, -10.0);
-uniform vec4 mat_color = vec4(1,1,1,1);
+uniform vec3 uCameraPos;
+uniform mat4 uTransformationMatrix;
+uniform mat4 uProjectionMatrix;
+uniform mat4 uViewMatrix;
+
+uniform vec3 uLightPosition = vec3(0.0, 0.0, -10.0);
+uniform vec4 uMaterialColor = vec4(1,1,1,1);
 
 const float density = 0.007;
 const float gradient = 1.5;
@@ -25,15 +27,15 @@ const float gradient = 1.5;
 void main()
 {
 
-	vec4 worldPosition = transformationMatrix * vec4(position, 1.0f);
-	vec4 positionRelativeToCamera = viewMatrix * worldPosition;
-	gl_Position = projectionMatrix * positionRelativeToCamera;
-	vert_color = mat_color * vec4(color.b, color.g, color.r, color.a);
+	vec4 worldPosition = uTransformationMatrix * vec4(position, 1.0f);
+	vec4 positionRelativeToCamera = uViewMatrix * worldPosition;
+	gl_Position = uProjectionMatrix * positionRelativeToCamera;
+	vert_color = uMaterialColor * vec4(color.b, color.g, color.r, color.a);
 
 	vert_texCoord = texCoord;
-	surfaceNormal = (transformationMatrix * vec4(normal, 0.0)).xyz;
-	toLightVector = light_position - worldPosition.xyz;
-	toCameraVector = (inverse(viewMatrix) * vec4(0, 0, 0, 1)).xyz - worldPosition.xyz;
+	surfaceNormal = (uTransformationMatrix * vec4(normal, 0.0)).xyz;
+	toLightVector = uLightPosition - worldPosition.xyz;
+	toCameraVector = uCameraPos - worldPosition.xyz;
 
 	float distance = length(positionRelativeToCamera.xyz);
 	visibility = exp(-pow((distance*density), gradient));
@@ -54,18 +56,18 @@ layout(location = 0) out vec4 out_color;
 layout(location = 1) out vec4 out_brightColor;
 
 uniform sampler2D textureSampler;
-uniform vec3 light_color = vec3(1.0f, 1.0f, 1.0f);
+uniform vec3 uLightColor;
 uniform vec3 fogColor;
-uniform float hasTexture = 1.0;
-uniform float specularExponent = 10.0;
-uniform float specularStrength = 1;
-uniform float diffuseStrength = 1;
-uniform float ambient = 0.3;
+uniform float uHasTexture = 1.0;
+uniform float uSpecularExponent = 10.0;
+uniform float uSpecularStrength = 1;
+uniform float uDiffuseStrength = 1;
+uniform float uAmbient = 0.3;
 
 void main()
 {
 	out_color = vert_color;
-	if (hasTexture > 0.5)
+	if (uHasTexture > 0.5)
 	{
 		out_color *= texture(textureSampler, vert_texCoord);
 		if (out_color.a < 0.1)
@@ -76,9 +78,9 @@ void main()
 	vec3 unitVectorToCamera = normalize(toCameraVector);
 	vec3 lightDirection = -unitLightVector;
 
-	float diffuse = diffuseStrength * max(dot(unitNormal, unitLightVector), 0.0);
-	float specular = specularStrength * pow(max(dot(reflect(lightDirection, unitNormal), unitVectorToCamera), 0.0f), specularExponent);
+	float uDiffuse = uDiffuseStrength * max(dot(unitNormal, unitLightVector), 0.0);
+	float uSpecular = uSpecularStrength * pow(max(dot(reflect(lightDirection, unitNormal), unitVectorToCamera), 0.0f), uSpecularExponent);
 
-	out_color *= vec4((ambient + (diffuse + specular) * light_color), 1.0f);
+	out_color *= vec4((uAmbient + (uDiffuse + uSpecular) * uLightColor), 1.0f);
 	out_color = mix(vec4(fogColor.xyz, 1.0), vec4(out_color.rgb, 1.0), visibility);
 }

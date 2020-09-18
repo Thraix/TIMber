@@ -11,19 +11,19 @@ out VertexData
   float visibility;
 } vs_out;
 
-uniform mat4 transformationMatrix;
-uniform mat4 projectionMatrix;
-uniform mat4 viewMatrix;
+uniform mat4 uTransformationMatrix;
+uniform mat4 uProjectionMatrix;
+uniform mat4 uViewMatrix;
 const float density = 0.003;
 const float gradient = 1.5;
 
 void main()
 {
   vs_out.color = color;
-  vec4 worldPosition = transformationMatrix * vec4(position, 1.0f);
-  vec4 positionRelativeToCamera = viewMatrix * worldPosition;
+  vec4 worldPosition = uTransformationMatrix * vec4(position, 1.0f);
+  vec4 positionRelativeToCamera = uViewMatrix * worldPosition;
 
-  gl_Position = projectionMatrix * positionRelativeToCamera;
+  gl_Position = uProjectionMatrix * positionRelativeToCamera;
   vs_out.worldPos = worldPosition.xyz;
 
   float distance = length(positionRelativeToCamera.xyz);
@@ -32,15 +32,16 @@ void main()
 }
 
 //geometry
-#version 330 core 
+#version 330 core
 
 layout(triangles) in;
 layout(triangle_strip, max_vertices=3) out;
 
-uniform mat4 transformationMatrix;
-uniform mat4 viewMatrix;
+uniform vec3 uCameraPos;
+uniform mat4 uTransformationMatrix;
+uniform mat4 uViewMatrix;
 
-uniform vec3 light_color = vec3(1.0f, 0.96f, 0.9f);
+uniform vec3 uLightColor = vec3(1.0f, 0.96f, 0.9f);
 uniform sampler2D noiseTexture;
 
 
@@ -76,7 +77,7 @@ void main()
         gs_in[1].worldPos - gs_in[0].worldPos, 
         gs_in[2].worldPos - gs_in[0].worldPos));// + rand(position);
   vec3 toLightVector = vec3(100, 100, 0);
-  vec3 toCameraVector = (inverse(viewMatrix) * vec4(0, 0, 0, 1)).xyz - position;
+  vec3 toCameraVector = uCameraPos - position;
   vec3 unitNormal = normalize(surfaceNormal);
   vec3 unitLightVector = normalize(toLightVector);
 
@@ -86,7 +87,7 @@ void main()
   if (brightness < 0.7)
     brightness = mix(0.3, 0.7, brightness / 0.7);
 
-  vec3 diffuse = light_color * brightness;
+  vec3 diffuse = uLightColor * brightness;
   vec4 color = gs_in[0].color * vec4(diffuse, 1.0f);
 
   for(int i = 0; i<3;i++)

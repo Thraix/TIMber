@@ -25,19 +25,19 @@ class Cube
     std::vector<MCPointData> data;
     MCMesh mcMesh;
     std::vector<Greet::Vec3<float>> vertices;
-    Greet::Camera& camera;
+    Greet::Ref<Greet::Camera3D> camera;
     Greet::BatchRenderer* renderer;
     std::vector<Greet::Renderable2D> renderables;
 
 
   public:
-    Cube(Greet::Camera& camera, size_t size)
-      : size{size}, material{Greet::Shader::FromFile("res/shaders/demo.shader")}, 
+    Cube(const Greet::Ref<Greet::Camera3D>& camera, size_t size)
+      : size{size}, material{Greet::Shader::FromFile("res/shaders/demo.shader")},
       shader2d{Greet::Shader::FromFile("res/shaders/2dshader.shader")},
       data{(size*size*size)},
       mcMesh(data, size, size, size), camera{camera}
     {
-      mesh = new Greet::Mesh(Greet::MeshFactory::Quad(0,0,0,1,1));
+      mesh = new Greet::Mesh(Greet::MeshFactory::Plane());
       renderer = new Greet::BatchRenderer(shader2d);
 
       vertices = {
@@ -69,11 +69,11 @@ class Cube
       }
     }
 
-    void Render(const Greet::Camera& camera) const
+    void Render(const Greet::Ref<Greet::Camera3D>& camera) const
     {
       if(showUi)
       {
-        Greet::Vec4 color{1.0f,1.0f,1.0f,1.0f};
+        Greet::Color color{1.0f,1.0f,1.0f,1.0f};
         LineRenderer::GetInstance().DrawLine(camera, vertices[0],vertices[1], color);
         LineRenderer::GetInstance().DrawLine(camera, vertices[2],vertices[3], color);
         LineRenderer::GetInstance().DrawLine(camera, vertices[4],vertices[5], color);
@@ -90,9 +90,10 @@ class Cube
         LineRenderer::GetInstance().DrawLine(camera, vertices[3],vertices[7], color);
       }
 
-      material.Bind(&camera);
-      material.GetShader()->SetUniform4f("mat_color", {1.0f,1.0f,1.0f,1.0f});
-      material.GetShader()->SetUniformMat4("transformationMatrix", Greet::Mat4::Translate({-0.5f - (size - 2) * 0.5f}));
+      material.Bind();
+      camera->SetShaderUniforms(material.GetShader());
+      material.GetShader()->SetUniform4f("uMaterialColor", {1.0f,1.0f,1.0f,1.0f});
+      material.GetShader()->SetUniformMat4("uTransformationMatrix", Greet::Mat4::Translate({-0.5f - (size - 2) * 0.5f}));
       mcMesh.Bind();
       GLCall(glDisable(GL_CULL_FACE));
       mcMesh.Render();
@@ -107,8 +108,8 @@ class Cube
         int i = 0;
         for(auto&& renderable : renderables)
         {
-          renderer->Submit(renderable);
-          renderer->SubmitString(std::to_string(i), renderable.m_position+Greet::Vec2{0.0f,-10.0f}, Greet::FontManager::Get("roboto", 30),0xff000000);
+          renderer->Draw(renderable);
+          renderer->DrawText(std::to_string(i), renderable.m_position+Greet::Vec2{0.0f,-10.0f}, Greet::FontManager::Get("roboto", 30),0xff000000);
           i++;
         }
         renderer->End();
@@ -176,7 +177,7 @@ class Cube
 
     Greet::Vec3<float> GetCubeScreenPos(size_t index)
     {
-      return camera.GetWorldToScreenCoordinate(vertices[index]);
+      return camera->GetWorldToScreenCoordinate(vertices[index]);
     }
 };
 

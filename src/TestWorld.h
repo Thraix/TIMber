@@ -24,7 +24,7 @@ class TestWorld : public Greet::Scene
     MCMesh* mesh;
     Greet::Skybox skybox;
     Greet::Material material;
-    PlayerCamera camera;
+    Greet::Ref<PlayerCamera> camera;
     bool mouseGrab = true;
     PhysicsEngine engine;
 
@@ -41,7 +41,7 @@ class TestWorld : public Greet::Scene
     TestWorld()
       : skybox{Greet::TextureManager::LoadCubeMap("res/textures/skybox.meta")},
       material{Greet::Shader::FromFile("res/shaders/terrain.shader")},
-      camera{90, 0.001f, 100.0f,{0.0f, 0.0f, 10.0f}, 0.0f,0.0f},
+      camera{new PlayerCamera{90, 0.001f, 100.0f,{0.0f, 0.0f, 10.0f}, 0.0f,0.0f}},
       plane{{0.0f, -0.0f, 0.0f}, {2.0f, 1.0f, 0.0f}},
       plane2{{0.0f, -10.0f, 0.0f}, {0.0f, 1.0f, 0.0f}},
       plane3{{25.0f, -10.0f, 0.0f}, {-2.0f, 1.0f, 0.0f}},
@@ -100,7 +100,7 @@ class TestWorld : public Greet::Scene
 
     void Update(float timeElapsed) override
     {
-      camera.Update(timeElapsed);
+      camera->Update(timeElapsed);
       //engine.Update(timeElapsed);
     }
 
@@ -112,27 +112,28 @@ class TestWorld : public Greet::Scene
       {
         for(int x = 0;x < size+1;x++)
         {
-          LineRenderer::GetInstance().DrawLine(camera, Greet::Vec3<float>(x, 0, z), Greet::Vec3<float>(x, size, z), Greet::Vec4(1,1,1,1));
+          LineRenderer::GetInstance().DrawLine(camera, Greet::Vec3<float>(x, 0, z), Greet::Vec3<float>(x, size, z), Greet::Vec4f(1,1,1,1));
         }
       }
       for(int y = 0;y < size+1;y++)
       {
         for(int x = 0;x < size+1;x++)
         {
-          LineRenderer::GetInstance().DrawLine(camera, Greet::Vec3<float>(x, y, 0), Greet::Vec3<float>(x, y, size), Greet::Vec4(1,1,1,1));
+          LineRenderer::GetInstance().DrawLine(camera, Greet::Vec3<float>(x, y, 0), Greet::Vec3<float>(x, y, size), Greet::Vec4f(1,1,1,1));
         }
       }
       for(int z = 0;z < size+1;z++)
       {
         for(int y = 0;y < size+1;y++)
         {
-          LineRenderer::GetInstance().DrawLine(camera, Greet::Vec3<float>(0, y, z), Greet::Vec3<float>(size, y, z), Greet::Vec4(1,1,1,1));
+          LineRenderer::GetInstance().DrawLine(camera, Greet::Vec3<float>(0, y, z), Greet::Vec3<float>(size, y, z), Greet::Vec4f(1,1,1,1));
         }
       }
 #endif
 
-      material.Bind(&camera);
-      material.GetShader()->SetUniformMat4("transformationMatrix", Greet::Mat4::Identity());
+      material.Bind();
+      camera->SetShaderUniforms(material.GetShader());
+      material.GetShader()->SetUniformMat4("uTransformationMatrix", Greet::Mat4::Identity());
       GLCall(glDisable(GL_CULL_FACE));
       mesh->Bind();
       mesh->Render();
@@ -146,7 +147,7 @@ class TestWorld : public Greet::Scene
 
     void OnEvent(Greet::Event& event) override
     {
-      camera.OnEvent(event);
+      camera->OnEvent(event);
       if(EVENT_IS_TYPE(event, Greet::EventType::MOUSE_PRESS))
       {
         Greet::MousePressEvent& e = (Greet::MousePressEvent&)event;

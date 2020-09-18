@@ -20,7 +20,7 @@ class Voxel
   public:
     size_t id;
     std::string name;
-    Greet::Vec4 color;
+    Greet::Color color;
   private:
 
     Voxel(const std::string& voxelName)
@@ -49,7 +49,7 @@ class Voxel
     virtual ~Voxel()
     {}
     Voxel(size_t id) : id{id} {}
-    Voxel& SetColor(const Greet::Vec4& color) { this->color = color; return *this; }
+    Voxel& SetColor(const Greet::Color& color) { this->color = color; return *this; }
 
     bool operator<(const Voxel& rhs) const
     {

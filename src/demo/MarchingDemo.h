@@ -5,7 +5,7 @@
 #include <input/InputDefines.h>
 #include <graphics/layers/Scene.h>
 #include <graphics/GlobalSceneManager.h>
-#include <graphics/cameras/TPCamera.h>
+#include <graphics/cameras/TPCamera3D.h>
 #include <event/MouseEvent.h>
 #include <event/KeyEvent.h>
 #include <graphics/gui/GUIScene.h>
@@ -20,21 +20,21 @@
 class MarchingDemo : public Greet::Scene
 {
   private:
-    Greet::TPCamera camera;
+    Greet::Ref<Greet::TPCamera3D> camera;
     Cube cube1;
     Cube cube2;
     bool fill = false;
     Greet::GUIScene* guiScene;
   public:
     MarchingDemo()
-      : camera{90, 0.01f, 1000.0f},
+      : camera{new Greet::TPCamera3D{90, 0.01f, 1000.0f}},
       cube1{camera, 2},
       cube2{camera, 4}
     {
       guiScene = new Greet::GUIScene(new Greet::GUIRenderer());
-      guiScene->AddFrame(Greet::FrameFactory::GetFrame("res/guis/demo.xml"));
+      Greet::Frame* frame = Greet::FrameFactory::GetFrame("res/guis/demo.xml");
+      guiScene->AddFrameQueued(frame);
       Greet::GlobalSceneManager::GetSceneManager().Add2DScene(guiScene, "gui");
-      Greet::Frame* frame = guiScene->GetFrame("TopComponent");
       using namespace std::placeholders;
       frame->GetComponentByName<Greet::Slider>("Slider0")
         ->SetOnValueChangeCallback(std::bind(&MarchingDemo::OnSliderChange, std::ref(*this), _1, _2, _3, 0));
@@ -89,7 +89,7 @@ class MarchingDemo : public Greet::Scene
 
     void Update(float timeElapsed) override
     {
-      camera.Update(timeElapsed);
+      camera->Update(timeElapsed);
       cube1.Update(timeElapsed);
       cube2.Update(timeElapsed);
     }
@@ -109,11 +109,11 @@ class MarchingDemo : public Greet::Scene
       {
         Greet::MousePressEvent& e = (Greet::MousePressEvent&)event;
         if(e.GetButton() == GREET_MOUSE_3)
-          camera.OnEvent(event);
+          camera->OnEvent(event);
       }
       else
       {
-        camera.OnEvent(event);
+        camera->OnEvent(event);
       }
       cube1.OnEvent(event);
       cube2.OnEvent(event);
@@ -121,7 +121,7 @@ class MarchingDemo : public Greet::Scene
 
     void ViewportResize(Greet::ViewportResizeEvent& event) override
     {
-      camera.ViewportResize(event);
+      camera->ViewportResize(event);
     }
 };
 

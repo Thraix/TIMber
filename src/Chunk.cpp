@@ -25,11 +25,6 @@ void Chunk::Initialize(uint posX, uint posZ)
   std::vector<float> caves = Noise::GenNoise(CHUNK_WIDTH+1,CHUNK_HEIGHT+3, CHUNK_LENGTH+1,4,32,32, 32,0.75f, posX * CHUNK_WIDTH, 0, posZ * CHUNK_LENGTH);
 
   std::vector<float> minerals = Noise::GenNoise(CHUNK_WIDTH+1,CHUNK_HEIGHT+3, CHUNK_LENGTH+1,3,8,8,8,0.75f, posX * CHUNK_WIDTH, CHUNK_HEIGHT, posZ * CHUNK_LENGTH);
-
-  {
-    MeshData data = MeshFactory::LowPolyGrid((CHUNK_WIDTH)/2.0,0,(CHUNK_LENGTH)/2.0,CHUNK_WIDTH, CHUNK_LENGTH,CHUNK_WIDTH, CHUNK_LENGTH,heightMap, CHUNK_HEIGHT+1);
-    originalMesh= new Mesh(data);
-  }
   voxelData = std::vector<MCPointData>((CHUNK_WIDTH+1) * (CHUNK_HEIGHT+3) * (CHUNK_LENGTH+1));
 #if 0
   voxelData[10 + (10 + 10 * (CHUNK_WIDTH+1)) * (CHUNK_HEIGHT+1)].inhabited = true;
@@ -137,14 +132,14 @@ void Chunk::AddTree(uint x, uint y, uint z)
 #endif
 }
 
-IntersectionData Chunk::RayCastChunk(const Camera& camera)
+IntersectionData Chunk::RayCastChunk(const Greet::Ref<Greet::Camera3D>& camera)
 {
-  Mat4 screenToModel = ~(camera.GetProjectionMatrix() * camera.GetViewMatrix() * GetTransformationMatrix());
+  Mat4 screenToModel = ~(camera->GetProjectionMatrix() * camera->GetViewMatrix() * GetTransformationMatrix());
 
   Vec3<float> near = screenToModel * Vec3<float>(0.0f, 0.0f, -1.0);
   Vec3<float> far = screenToModel * Vec3<float>(0.0f, 0.0f, 1.0);
 
-  if(RayCast::CheckCube(near,far, {0,0,0}, {CHUNK_WIDTH+1, CHUNK_HEIGHT+1, CHUNK_LENGTH+1}))
+  if(RayCast::CheckCube(near, far, {0,0,0}, {CHUNK_WIDTH+1, CHUNK_HEIGHT+1, CHUNK_LENGTH+1}))
   {
     static int i = 0;
     i++;
@@ -164,7 +159,7 @@ void Chunk::UpdateMesh()
   {
     mesh->UpdateData(voxelData, chunkChange.minX, chunkChange.minY, chunkChange.minZ, chunkChange.maxX - chunkChange.minX + 1,chunkChange.maxY - chunkChange.minY + 1, chunkChange.maxZ - chunkChange.minZ + 1);
     chunkChange.dirty = false;
-  } 
+  }
 }
 
 void Chunk::UpdateVoxel(int x, int y, int z, const MCPointData& data)

@@ -48,7 +48,7 @@ MCMesh::MCMesh(const std::vector<MCPointData>& data, uint width, uint height, ui
   vbo_position->Disable();
 
   vbo_color->Enable();
-  vbo_color->UpdateData(colors.data(), colors.size() * sizeof(Vec4));
+  vbo_color->UpdateData(colors.data(), colors.size() * sizeof(Color));
   vbo_color->SetStructure({{1, BufferAttributeType::VEC4}});
   vao->AddVertexBuffer(vbo_color);
   vbo_color->Disable();
@@ -168,7 +168,7 @@ void MCMesh::Unbind() const
 void MCMesh::UpdateRenderData()
 {
   UpdateBuffer(vbo_position, vertices.data(), vertices.size() * sizeof(Vec3<float>));
-  UpdateBuffer(vbo_color, colors.data(), colors.size() * sizeof(Vec4));
+  UpdateBuffer(vbo_color, colors.data(), colors.size() * sizeof(Color));
   UpdateBuffer(ibo, faces.data(), faces.size() * 3 * sizeof(uint));
 }
 
@@ -209,7 +209,7 @@ uint MCMesh::AddFace(const Vec3<size_t>& vertices, const Greet::Vec3<size_t>& vo
   return pos;
 }
 
-const Vec4& MCMesh::GetColor(size_t edge, const Vec3<size_t>& voxel)
+const Color& MCMesh::GetColor(size_t edge, const Vec3<size_t>& voxel)
 {
   Vec3<float> vMin = MCClassification::vertices[MCClassification::edges[edge].first];
   Vec3<float> vMax = MCClassification::vertices[MCClassification::edges[edge].second];
@@ -229,7 +229,7 @@ void MCMesh::RemoveFace(uint face)
 {
   fragmentFaces.push(Fragmentation{face, 1});
 
-  // Invalidate all the vertices 
+  // Invalidate all the vertices
   faces[face].v1 = 0;
   faces[face].v2 = 0;
   faces[face].v3 = 0;

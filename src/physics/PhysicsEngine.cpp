@@ -6,11 +6,11 @@ using namespace Greet;
 
 #ifdef RENDER_PHYSICS
 PhysicsEngine::PhysicsEngine()
-  : material{Greet::Shader::FromFile("res/shaders/3dshader.shader")}
+  : material{Greet::ShaderFactory::Shader3D()}
 {
-  sphereMesh = new Mesh(MeshFactory::Sphere({}, 1.0f, 20, 20));
+  sphereMesh = new Mesh(MeshFactory::Sphere(20, 20));
   sphereMesh->SetEnableCulling(false);
-  planeMesh = new Mesh(Greet::MeshFactory::Quad(0.0f,0.0f,0.0f,60.0f,60.0f));
+  planeMesh = new Mesh(Greet::MeshFactory::Plane({0.0f},{60.0f,60.0f}));
   planeMesh->SetEnableCulling(false);
 }
 #else
@@ -138,16 +138,16 @@ void PhysicsEngine::ResolveCollision(PhysicsBody& first, PhysicsBody& second)
 }
 #ifdef RENDER_PHYSICS
 static int i = 0;
-void PhysicsEngine::Render(const Camera& camera) const
+void PhysicsEngine::Render(const Greet::Ref<Greet::Camera3D>& camera) const
 {
   i++;
-  material.Bind(&camera);
-  material.GetShader()->SetUniform4f("mat_color", Vec4{1.0f, 0.0f, 0.0f, 1.0f});
+  material.Bind();
+  material.GetShader()->SetUniform4f("uMaterialColor", Vec4{1.0f, 0.0f, 0.0f, 1.0f});
   for(auto&& body : bodies)
   {
     if(body->GetType() == CollisionType::Sphere)
     {
-      material.GetShader()->SetUniformMat4("transformationMatrix", Mat4::Translate(body->GetPosition()) * Mat4::Scale({((PhysicsSphereBody*)body)->GetRadius()}));
+      material.GetShader()->SetUniformMat4("uTransformationMatrix", Mat4::Translate(body->GetPosition()) * Mat4::Scale({((PhysicsSphereBody*)body)->GetRadius()}));
       sphereMesh->Bind();
       sphereMesh->Render();
       sphereMesh->Unbind();
@@ -155,7 +155,7 @@ void PhysicsEngine::Render(const Camera& camera) const
     else if(body->GetType() == CollisionType::Plane)
     {
       PhysicsPlaneBody* plane = (PhysicsPlaneBody*)body;
-      material.GetShader()->SetUniformMat4("transformationMatrix", Mat4::Translate(body->GetPosition()) * Mat4::RotateRX(atan2(plane->GetNormal().z, plane->GetNormal().y)) * Mat4::RotateRZ(-atan2(plane->GetNormal().x, plane->GetNormal().y)));
+      material.GetShader()->SetUniformMat4("uTransformationMatrix", Mat4::Translate(body->GetPosition()) * Mat4::RotateX(atan2(plane->GetNormal().z, plane->GetNormal().y)) * Mat4::RotateZ(-atan2(plane->GetNormal().x, plane->GetNormal().y)));
       planeMesh->Bind();
       planeMesh->Render();
       planeMesh->Unbind();

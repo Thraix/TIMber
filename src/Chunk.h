@@ -25,7 +25,6 @@ class Chunk
     ChunkChange chunkChange;
     MCMesh* mesh;
     std::vector<MCPointData> voxelData;
-    Greet::Mesh* originalMesh;
     std::vector<float> heightMap;
     std::vector<float> biome;
     uint posX;
@@ -39,7 +38,7 @@ class Chunk
     void Update(float timeElapsed);
 
     Greet::Mat4 GetTransformationMatrix() const { return Greet::Mat4::Translate({posX * CHUNK_WIDTH, 0 , posZ * CHUNK_LENGTH});}
-    IntersectionData RayCastChunk(const Greet::Camera& camera);
+    IntersectionData RayCastChunk(const Greet::Ref<Greet::Camera3D>& camera);
 
 
     void UpdateMesh();

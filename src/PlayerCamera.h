@@ -1,8 +1,8 @@
 #pragma once
 
-#include <graphics/cameras/Camera.h>
+#include <graphics/cameras/Camera3D.h>
 
-class PlayerCamera : public Greet::Camera
+class PlayerCamera : public Greet::Camera3D
 {
   private:
     struct Movement
@@ -17,15 +17,14 @@ class PlayerCamera : public Greet::Camera
 
     Greet::Vec3<float> position;
     Greet::Vec3<float> rotation;
-    Greet::Mat4 viewMatrix;
     Greet::Vec3<float> velocity;
     Movement movement;
   public:
     PlayerCamera(float fov, float near, float far, const Greet::Vec3<float>& position, float pitch, float yaw)
-      : Camera{fov, near, far}, position{position}, rotation{pitch, yaw, 0},
-      viewMatrix{Greet::Mat4::ViewMatrix(position, rotation)} {}
-
-    virtual const Greet::Mat4& GetViewMatrix() const { return viewMatrix; }
+      : Camera3D{fov, near, far}, position{position}, rotation{pitch, yaw, 0}
+    {
+      SetViewMatrix(Greet::Mat4::ViewMatrix(position, rotation));
+    }
 
     virtual ~PlayerCamera();
 

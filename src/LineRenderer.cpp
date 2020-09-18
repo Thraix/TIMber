@@ -11,22 +11,23 @@ LineRenderer::LineRenderer()
 {
   vao = VertexArray::Create();
   vbo = VertexBuffer::CreateDynamic(nullptr, 2 * sizeof(Vec3<float>));
-  vbo->SetStructure({{0, BufferAttributeType::VEC4}});
+  vbo->SetStructure({{0, BufferAttributeType::VEC3}});
+  vao->AddVertexBuffer(vbo);
   vbo->Disable();
-  vao->Disable();
   uint indices[2] = {0, 1};
   ibo = Buffer::Create(2 * sizeof(uint), BufferType::INDEX, BufferDrawType::STATIC);
   ibo->Enable();
   ibo->UpdateData(indices);
   ibo->Disable();
+  vao->SetIndexBuffer(ibo);
+  vao->Disable();
 }
 
-void LineRenderer::DrawLine(const Camera& camera, const Vec3<float>& p1, const Vec3<float>& p2, const Vec4& color) const
+void LineRenderer::DrawLine(const Ref<Camera3D>& camera, const Vec3<float>& p1, const Vec3<float>& p2, const Color& color) const
 {
   shader->Enable();
-  shader->SetUniformMat4("projectionMatrix", camera.GetProjectionMatrix());
-  shader->SetUniformMat4("viewMatrix", camera.GetViewMatrix());
-  shader->SetUniform4f("lineColor", color);
+  camera->SetShaderUniforms(shader);
+  shader->SetUniformColor4("lineColor", color);
   GLCall(glLineWidth(5.0f));
 
   vbo->Enable();
@@ -37,9 +38,7 @@ void LineRenderer::DrawLine(const Camera& camera, const Vec3<float>& p1, const V
   vbo->Disable();
 
   vao->Enable();
-  ibo->Enable();
   GLCall(glDrawElements(GL_LINES, 2, GL_UNSIGNED_INT, nullptr));
-  ibo->Disable();
   vao->Disable();
 
   shader->Disable();

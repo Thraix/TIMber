@@ -5,10 +5,10 @@
 
 using namespace Greet;
 
-PlayerCamera Player::CreateCamera()
+Ref<PlayerCamera> Player::CreateCamera()
 {
   float distance = 0.0f;
-  return PlayerCamera(90.0, 0.01, 1000.0, Greet::Vec3<float>(), 0.0f, 0.0f);
+  return Ref<PlayerCamera>{new PlayerCamera(90.0, 0.01, 1000.0, Greet::Vec3<float>(), 0.0f, 0.0f)};
 }
 
 Player::Player(World* world, const Greet::Vec3<float>& position)
@@ -26,11 +26,12 @@ void Player::OnWorldInit()
 void Player::Render() const
 {
   return;
-  playerModel.model->BindShader(nullptr, &camera);
+  playerModel.model->BindShader();
+  camera->SetShaderUniforms(playerModel.material.GetShader());
   playerModel.model->PreRender();
-  playerModel.model->Render(nullptr, &camera);
+  playerModel.model->Render();
   playerModel.model->PostRender();
-  playerModel.model->UnbindShader(nullptr, &camera);
+  playerModel.model->UnbindShader();
 }
 void Player::Update(float timeElapsed)
 {
@@ -71,22 +72,22 @@ void Player::Update(float timeElapsed)
   }
 
   Vec2 movement{playerMovement.velocity.x, playerMovement.velocity.z};
-  movement.Rotate(camera.GetYaw());
+  movement.Rotate(camera->GetYaw());
   playerMovement.velocity = {movement.x, playerMovement.velocity.y, movement.y};
   position += playerMovement.velocity * timeElapsed * 10;
 
   playerModel.model->SetPosition(position);
   playerModel.model->Update(timeElapsed);
 
-  camera.SetPosition(position*1);
-  camera.Update(timeElapsed);
+  camera->SetPosition(position*1);
+  camera->Update(timeElapsed);
 }
 
 void Player::Move(float timeElapsed)
 {
   static int i = 0;
   i++;
-  // Calculate acceleration 
+  // Calculate acceleration
   Vec2 acc = {0,0};
   float accel = 50.0f;
   if(playerControl.forward) acc.y -= 1;
@@ -95,10 +96,10 @@ void Player::Move(float timeElapsed)
   if(playerControl.right) acc.x += 1;
   if(acc.LengthSQ() > 0.0f)
   {
-    acc.Rotate(camera.GetYaw()).Normalize();
+    acc.Rotate(camera->GetYaw()).Normalize();
     acc *= accel;
   }
-  Vec3<float> acceleration = Vec3(acc.x, 0.0f, acc.y);
+  Vec3f acceleration = Vec3f(acc.x, 0.0f, acc.y);
   playerMovement.velocity.x *= 0.999; // Friction
   playerMovement.velocity.z *= 0.999; // Friction
 
@@ -181,7 +182,7 @@ void Player::OnEvent(Event& event)
   }
   else if(EVENT_IS_TYPE(event, EventType::MOUSE_MOVE))
   {
-    camera.OnEvent(event);
+    camera->OnEvent(event);
   }
   else if(EVENT_IS_TYPE(event, EventType::MOUSE_PRESS))
   {
@@ -203,11 +204,11 @@ void Player::OnEvent(Event& event)
   else if(EVENT_IS_TYPE(event, EventType::WINDOW_RESIZE))
   {
     WindowResizeEvent& e = (WindowResizeEvent&)event;
-    camera.SetProjectionMatrix(Greet::Mat4::ProjectionMatrix(Window::GetAspect(), 90.0, 0.01, 1000.0));
+    camera->SetProjectionMatrix(Greet::Mat4::Perspective(Window::GetAspect(), 90.0, 0.01, 1000.0));
   }
 }
 
-const PlayerCamera& Player::GetCamera() const
+const Ref<PlayerCamera>& Player::GetCamera() const
 {
   return camera;
 }

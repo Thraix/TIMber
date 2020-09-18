@@ -25,13 +25,14 @@ void World::Render() const
 {
   skybox.Render(player.GetCamera());
 
-  terrainMaterial.Bind(&player.GetCamera());
+  terrainMaterial.Bind();
+  player.GetCamera()->SetShaderUniforms(terrainMaterial.GetShader());
   noiseTexture->Enable();
   for(int z = 0;z < length; z++)
   {
     for(int x = 0;x < width; x++)
     {
-      terrainMaterial.GetShader()->SetUniformMat4("transformationMatrix", chunks[x + z * width].GetTransformationMatrix());
+      terrainMaterial.GetShader()->SetUniformMat4("uTransformationMatrix", chunks[x + z * width].GetTransformationMatrix());
       MCMesh* mesh = chunks[x + z * width].mesh;
       mesh->Bind();
       mesh->Render();
@@ -91,7 +92,6 @@ void World::Update(float timeElapsed)
     for(int x = 0;x<width;x++)
     {
       chunks[x + z * width].Update(timeElapsed);
-
     }
   }
   cursor.Update(timeElapsed);

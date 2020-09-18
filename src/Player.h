@@ -38,9 +38,9 @@ class Player
     Greet::EntityModel* model;
 
     PlayerModel()
-      : material{Greet::Shader::FromFile("res/shaders/3dshader.shader")}
+      : material{Greet::ShaderFactory::Shader3D()}
     {
-      mesh = new Greet::Mesh(Greet::MeshFactory::Cube(0,0.2f,0,0.2f,0.4f,0.2f));
+      mesh = new Greet::Mesh(Greet::MeshFactory::Cube({0,0.2f,0},{0.2f,0.4f,0.2f}));
       model = new Greet::EntityModel(mesh, &material);
     }
 
@@ -54,7 +54,7 @@ class Player
   private:
     Inventory inventory;
     InventoryScene invScene;
-    PlayerCamera camera;
+    Greet::Ref<PlayerCamera> camera;
     Greet::Vec3<float> position;
     PlayerMovement playerMovement;
     PlayerControl playerControl;
@@ -63,7 +63,7 @@ class Player
 
   private:
     // Since this initialization takes up a lot of space the code looks cleaner with this
-    static PlayerCamera CreateCamera();
+    static Greet::Ref<PlayerCamera> CreateCamera();
 
   public:
 
@@ -73,7 +73,7 @@ class Player
     void Update(float timeElapsed);
     void OnEvent(Greet::Event& event);
 
-    const PlayerCamera& GetCamera() const;
+    const Greet::Ref<PlayerCamera>& GetCamera() const;
     const Greet::Vec3<float>& GetPosition() const { return position; }
     const float GetReach() const { return 20; };
 

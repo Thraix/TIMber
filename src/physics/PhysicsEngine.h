@@ -6,6 +6,7 @@
 #include <graphics/models/Material.h>
 #include <graphics/models/Mesh.h>
 #include <graphics/models/MeshFactory.h>
+#include <graphics/cameras/Camera3D.h>
 #endif
 
 #include "PhysicsBody.h"
@@ -30,7 +31,7 @@ class PhysicsEngine
     bool CheckCollision(PhysicsBody& first, PhysicsBody& second);
     void ResolveCollision(PhysicsBody& first, PhysicsBody& second);
 #ifdef RENDER_PHYSICS
-    void Render(const Greet::Camera& camera) const;
+    void Render(const Greet::Ref<Greet::Camera3D>& camera) const;
 #endif
 };
 

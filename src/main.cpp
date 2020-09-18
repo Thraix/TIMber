@@ -65,7 +65,7 @@ class Game : public App
     void Init()
     {
       LineRenderer::CreateInstance();
-      FontManager::Add(new FontContainer("res/fonts/Roboto-Black.ttf","roboto"));
+      FontManager::Add("roboto", FontContainer("res/fonts/Roboto-Black.ttf"));
       std::vector<float> noiseMap = Noise::GenNoise(512, 512, 5, 128, 128, 0.75f);
       std::vector<BYTE> image = ImageUtils::CreateHeightmapImage(noiseMap, 512, 512);
       TextureManager::AddTexture2D("noiseMap", Texture2D::Create(image, 512, 512));
